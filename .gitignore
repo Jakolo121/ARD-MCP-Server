@@ -1,0 +1,63 @@
+# =============================================================================
+# ARD MCP Server — .gitignore
+# =============================================================================
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+MANIFEST
+
+# ── Virtual environments ──────────────────────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+
+# ── uv ────────────────────────────────────────────────────────────────────────
+# uv.lock is committed (reproducible builds); keep it.
+# Nothing else from uv needs to be tracked.
+
+# ── Testing & coverage ────────────────────────────────────────────────────────
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.tox/
+
+# ── Type checking ─────────────────────────────────────────────────────────────
+.mypy_cache/
+.pytype/
+
+# ── Environment / secrets ─────────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+# .env.example is intentionally committed
+
+# ── IDE / editor ─────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ── macOS ─────────────────────────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ── Docker ────────────────────────────────────────────────────────────────────
+# Compose override files with local secrets — never commit
+docker-compose.override.yml
+
+# ── Logs ─────────────────────────────────────────────────────────────────────
+logs/
+*.log

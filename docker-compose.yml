@@ -1,0 +1,57 @@
+# =============================================================================
+# ARD / Tagesschau MCP Server — Docker Compose
+#
+# Usage:
+#   docker compose up           # start in foreground
+#   docker compose up -d        # start in background
+#   docker compose logs -f      # follow logs
+#   docker compose down         # stop & remove containers
+#
+# The server will be available at:
+#   http://localhost:8000/sse   (MCP SSE endpoint)
+# =============================================================================
+
+services:
+  ard-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ard-mcp:latest
+    container_name: ard-mcp
+
+    # Load overrides from .env (copy .env.example → .env first)
+    env_file:
+      - .env
+
+    environment:
+      TRANSPORT: sse
+      HOST: 0.0.0.0
+      PORT: "8000"
+      LOG_LEVEL: INFO
+
+    ports:
+      - "8000:8000"
+
+    # Restart policy — sensible default for production
+    restart: unless-stopped
+
+    # Resource limits — adjust for your host
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+        reservations:
+          memory: 64M
+
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import httpx; httpx.get('http://localhost:8000/health', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+    # Mount logs directory for persistent log access (optional)
+    # volumes:
+    #   - ./logs:/app/logs

@@ -1,0 +1,67 @@
+[project]
+name = "ard-mcp"
+version = "0.2.0"
+description = "A MCP Server that brings the latest ARD/Tagesschau news into your AI chat application."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.12"
+keywords = ["mcp", "ard", "tagesschau", "news", "llm", "claude"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "fastmcp>=2.2.5",
+    "httpx>=0.27",
+]
+
+[project.urls]
+Homepage    = "https://github.com/Jakolo121/ard_mcp_server"
+Repository  = "https://github.com/Jakolo121/ard_mcp_server"
+Issues      = "https://github.com/Jakolo121/ard_mcp_server/issues"
+Changelog   = "https://github.com/Jakolo121/ard_mcp_server/blob/main/CHANGELOG.md"
+
+[project.scripts]
+ard-mcp = "ard_mcp.server:run"
+
+[project.optional-dependencies]
+dev = [
+    "anyio>=4.0",
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "pylint>=3.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.9.30,<0.12"]
+build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+# Put src/ on sys.path so tests can import ard_mcp without installing
+pythonpath = ["src"]
+# Show locals on failure, verbose output
+addopts = "-v --tb=short"
+# Register custom markers to suppress warnings
+markers = [
+    "integration: marks tests that require internet access (run with -m integration)",
+]
+
+[tool.pylint.main]
+source-roots = ["src"]
+
+[tool.pylint.format]
+max-line-length = 100
+
+[tool.pylint."messages control"]
+disable = [
+    "missing-module-docstring",
+    "too-few-public-methods",
+]
