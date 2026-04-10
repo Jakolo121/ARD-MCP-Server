@@ -15,7 +15,7 @@
 1. [Was ist dieses Projekt?](#was-ist-dieses-Projekt)
 2. [Features](#features)
 3. [Projektstruktur](#projektstruktur)
-4. [Schnellstart — Lokal (Claude Desktop)](#schnellstart--lokal-claude-desktop)
+4. [Schnellstart Lokal (Claude Desktop)](#schnellstart--lokal-claude-desktop)
 5. [Remote / Docker-Deployment](#remote--docker-deployment)
 6. [Konfigurationsreferenz](#konfigurationsreferenz)
 7. [Verfügbare Tools](#verfügbare-tools)
@@ -30,7 +30,7 @@
 
 ## Was ist dieses Projekt?
 
-Dieser MCP-Server verbindet die ARD/Tageschau-API mit deinem KI-Assistenten (Claude, Open Claw u.a.). Du entscheidest, welche Inhalte dein Assistent abrufen darf.
+Dieser MCP-Server verbindet die ARD/Tagesschau-API mit deinem KI-Assistenten (Claude, Open Claw u.a.).
 
 Sobald verbunden, kann der Assistent z.B folgende Anfragen beantworten:
 
