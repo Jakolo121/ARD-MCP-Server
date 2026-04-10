@@ -3,13 +3,13 @@ name = "ard-mcp"
 version = "0.2.0"
 description = "A MCP Server that brings the latest ARD/Tagesschau news into your AI chat application."
 readme = "README.md"
-license = { text = "MIT" }
+license = { text = "Apache-2.0" }
 requires-python = ">=3.12"
 keywords = ["mcp", "ard", "tagesschau", "news", "llm", "claude"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
+    "License :: OSI Approved :: Apache Software License",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
