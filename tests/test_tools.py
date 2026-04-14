@@ -115,6 +115,20 @@ class TestToolGetNewsByRessortMock:
             result = await tool_get_news_by_ressort(ressort)
         assert "Error" not in result or "Invalid" not in result
 
+    async def test_uppercase_ressort_is_normalised(self, news_item):
+        """'INLAND' must be accepted and treated identically to 'inland'."""
+        payload = {"items": [news_item]}
+        with patch(GET_NEWS_PATH, AsyncMock(return_value=payload)):
+            result = await tool_get_news_by_ressort("INLAND")
+        assert "Invalid ressort" not in result
+
+    async def test_mixed_case_ressort_is_normalised(self, news_item):
+        """'Wirtschaft' must be accepted and treated identically to 'wirtschaft'."""
+        payload = {"items": [news_item]}
+        with patch(GET_NEWS_PATH, AsyncMock(return_value=payload)):
+            result = await tool_get_news_by_ressort("Wirtschaft")
+        assert "Invalid ressort" not in result
+
 
 class TestToolGetRegionalNewsMock:
     """Unit tests for tool_get_regional_news()."""

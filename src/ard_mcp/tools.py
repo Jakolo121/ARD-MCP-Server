@@ -12,7 +12,7 @@ from typing import Optional
 
 from ard_mcp.client import ENDPOINTS, fetch_from_api, get_news
 from ard_mcp.formatters import _format_streams, format_channels, format_news_list
-from ard_mcp.validators import VALID_REGION_IDS, VALID_RESSORTS, validate_ressort
+from ard_mcp.validators import VALID_REGION_IDS, VALID_RESSORTS, normalise_ressort, validate_ressort
 
 # VALID_RESSORTS is re-exported so tests can import it from ard_mcp.tools
 __all__ = ["VALID_RESSORTS", "VALID_REGION_IDS", "validate_ressort"]
@@ -75,6 +75,7 @@ async def tool_get_news_by_ressort(ressort: str, limit: int = 10) -> str:
     if limit <= 0:
         return "ℹ️ limit=0 — no items requested. Please specify a limit ≥ 1."
 
+    ressort = normalise_ressort(ressort)
     error = validate_ressort(ressort)
     if error:
         return error
@@ -125,6 +126,7 @@ async def tool_get_regional_news(
     params = {"regions": str(region_id)}
 
     if ressort is not None:
+        ressort = normalise_ressort(ressort)
         error = validate_ressort(ressort)
         if error:
             return error
@@ -258,6 +260,7 @@ async def tool_get_news(
         params["regions"] = regions
 
     if ressort is not None:
+        ressort = normalise_ressort(ressort)
         error = validate_ressort(ressort)
         if error:
             return error

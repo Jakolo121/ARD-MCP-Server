@@ -24,11 +24,20 @@ VALID_REGION_IDS: frozenset = frozenset(range(1, 17))
 # Validators
 # ---------------------------------------------------------------------------
 
+def normalise_ressort(ressort: str) -> str:
+    """Strip whitespace and normalise a ressort string to lowercase.
+
+    This makes the API forgiving for user-agents and LLMs that may supply
+    ``"Inland"``, ``"INLAND"``, or ``" inland "`` instead of ``"inland"``.
+    """
+    return ressort.strip().lower()
+
+
 def validate_ressort(ressort: str) -> Optional[str]:
     """Validate a ressort slug.
 
     Args:
-        ressort: The ressort slug to validate.
+        ressort: The ressort slug to validate (already normalised).
 
     Returns:
         ``None`` when valid; a human-readable error string when invalid.

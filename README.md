@@ -260,6 +260,8 @@ Nach Kategorie filtern.
 | `ressort` | str | —        | `inland` `ausland` `wirtschaft` `sport` `video` `investigativ` `wissen` |
 | `limit`   | int | 10       | Maximale Ergebnisse                                                     |
 
+> Ressort-Strings werden automatisch zu Kleinbuchstaben normalisiert — `"Inland"`, `"INLAND"` und `"inland"` sind gleichwertig.
+
 ---
 
 ### `get_regional_news`

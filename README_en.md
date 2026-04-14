@@ -255,6 +255,8 @@ Filter news by category.
 | `ressort` | str  | —       | `inland` `ausland` `wirtschaft` `sport` `video` `investigativ` `wissen` |
 | `limit`   | int  | 10      | Max items to return                                                     |
 
+> Ressort strings are automatically normalised to lowercase — `"Inland"`, `"INLAND"` and `"inland"` are all equivalent.
+
 ---
 
 ### `get_regional_news`
