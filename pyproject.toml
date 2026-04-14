@@ -4,8 +4,11 @@ version = "0.2.0"
 description = "A MCP Server that brings the latest ARD/Tagesschau news into your AI chat application."
 readme = "README.md"
 license = { text = "Apache-2.0" }
+authors = [
+    { name = "Isabell Lorenzo-Reichardt", email = "Bereichardt@gmail.com" }
+]
 requires-python = ">=3.12"
-keywords = ["mcp", "ard", "tagesschau", "news", "llm", "claude"]
+keywords = ["mcp", "ard", "tagesschau", "news", "llm", "AI-Assistent"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",

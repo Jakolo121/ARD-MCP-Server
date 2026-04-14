@@ -8,6 +8,11 @@
 ![python](https://img.shields.io/badge/python-3.12%2B-blue)
 ![license](https://img.shields.io/badge/license-Apache%202.0-blue)
 
+Sprache:
+
+- 🇩🇪 Deutsch
+- 🇬🇧 [English](README_en.md)
+
 ---
 
 ## Inhaltsverzeichnis
