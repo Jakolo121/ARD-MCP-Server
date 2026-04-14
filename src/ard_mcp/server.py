@@ -24,7 +24,6 @@ from ard_mcp.resources import (
 from ard_mcp.tools import (
     tool_get_channels,
     tool_get_latest_news,
-    tool_get_news,
     tool_get_news_by_ressort,
     tool_get_regional_news,
     tool_search_news,
@@ -112,22 +111,6 @@ async def search_news(
         result_page: Page number for pagination (default: 0).
     """
     return await tool_search_news(search_text, page_size, result_page)
-
-
-@mcp.tool()
-async def get_news(
-    regions: Optional[str] = None,
-    ressort: Optional[str] = None,
-    limit: int = 10,
-) -> str:
-    """Get news with flexible parameter options.
-
-    Args:
-        regions: Optional region ID as string (1–16).
-        ressort: Optional ressort/category.
-        limit: Maximum number of news items to return (default: 10).
-    """
-    return await tool_get_news(regions, ressort, limit)
 
 
 @mcp.tool()
