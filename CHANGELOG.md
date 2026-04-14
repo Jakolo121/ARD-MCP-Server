@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [0.2.0] — 2026-04-09
+## [1.0.0] — 2026-04-09
 
 ### Added
 
@@ -45,5 +45,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Environment-variable-driven configuration (`config.py`)
 - `httpx`-based async HTTP client with structured error handling
 
-[0.2.0]: https://github.com/Jakolo121/ard_mcp_server/compare/v0.1.0...v0.2.0
+[1.0.0]: https://github.com/Jakolo121/ard_mcp_server/compare/v0.1.0...v1.0.0
 [0.1.0]: https://github.com/Jakolo121/ard_mcp_server/releases/tag/v0.1.0
