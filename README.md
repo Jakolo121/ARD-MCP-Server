@@ -97,7 +97,7 @@ ARD_MCP/
 
 ---
 
-## Schnellstart — Lokal (Bsp. Claude Desktop - gilt aber auch für andere KI-Assistenten)
+## Schnellstart Lokal (Bsp. Claude Desktop - gilt aber auch für andere KI-Assistenten)
 
 Der `stdio`-Transport startet den Server als Subprocess. Es muss kein Port angegeben werden.
 
@@ -266,11 +266,11 @@ Nach Kategorie filtern.
 
 Regionalnachrichten.
 
-| Parameter   | Typ | Standard | Beschreibung                                                                                                         |
-| ----------- | --- | -------- | -------------------------------------------------------------------------------------------------------------------- |
+| Parameter   | Typ | Standard | Beschreibung                                                                                                           |
+| ----------- | --- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `region_id` | int | —        | 1=BW · 2=BY · 3=BE · 4=BB · 5=HB · 6=HH · 7=HE · 8=MV · 9=NI · 10=NRW · 11=RLP · 12=SL · 13=SN · 14=ST · 15=SH · 16=TH |
-| `ressort`   | str | None     | Optionaler Kategorie-Filter                                                                                          |
-| `limit`     | int | 10       | Maximale Ergebnisse                                                                                                  |
+| `ressort`   | str | None     | Optionaler Kategorie-Filter                                                                                            |
+| `limit`     | int | 10       | Maximale Ergebnisse                                                                                                    |
 
 ---
 

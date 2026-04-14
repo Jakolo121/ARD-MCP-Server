@@ -96,7 +96,7 @@ ARD_MCP/
 
 ---
 
-## Quick Start — Local (Claude Desktop)
+## Quick Start Local (Claude Desktop but is applicable for other AI Assistents)
 
 This mode uses `stdio` transport — the server is launched as a child process by Claude Desktop. No port is needed.
 
