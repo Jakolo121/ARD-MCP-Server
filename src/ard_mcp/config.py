@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 #: Which MCP transport to use.
 #: - "stdio"            → local Claude Desktop / CLI usage
-#: - "sse"             → Server-Sent Events (remote / Docker)
+#: - "sse"             → Server-Sent Events (legacy, still supported)
 #: - "streamable_http" → HTTP streaming (remote / Docker, newer clients)
 TRANSPORT: str = os.getenv("TRANSPORT", "stdio")
 

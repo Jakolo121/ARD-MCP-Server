@@ -61,3 +61,5 @@ docker-compose.override.yml
 # ── Logs ─────────────────────────────────────────────────────────────────────
 logs/
 *.log
+CLAUDE.md
+

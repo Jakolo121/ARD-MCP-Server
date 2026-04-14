@@ -54,7 +54,7 @@ All data comes from the official, public [Tagesschau API](https://www.tagesschau
 | 🗞️ **Live news**        | Fetches breaking news, categorised news, and regional news in real time |
 | 🔍 **Full-text search** | Search across all Tagesschau articles                                   |
 | 📺 **Live streams**     | List all available Tagesschau channels and HLS stream URLs              |
-| 🚀 **Dual transport**   | `stdio` for local Claude Desktop; `sse` for remote / Docker             |
+| 🚀 **Dual transport**   | `stdio` for local Claude Desktop; `streamable_http` for remote / Docker |
 | 🐳 **Docker-ready**     | Multi-stage image, non-root user, health-check, resource limits         |
 | ✅ **124 unit tests**   | Full mock test suite + live integration tests, < 0.3 s                  |
 | 🛠️ **Makefile**         | `make test`, `make lint`, `make docker-build` and more                  |
@@ -166,7 +166,7 @@ Ask Claude:
 
 ## Remote / Docker Deployment
 
-This mode uses `sse` (Server-Sent Events) transport over HTTP. Ideal for servers, cloud VMs, or sharing the server across multiple clients.
+This mode uses `streamable_http` transport over HTTP. Ideal for servers, cloud VMs, or sharing the server across multiple clients. Stateless — no session state on the server, built for horizontal scaling.
 
 ### Prerequisites
 
@@ -195,13 +195,14 @@ docker compose logs ard-mcp      # view logs
 docker compose ps                # check status
 ```
 
-### Step 4 — Connect Claude Desktop (SSE)
+### Step 4 — Connect Claude Desktop (Streamable HTTP)
 
 ```json
 {
   "mcpServers": {
     "tagesschau": {
-      "url": "http://localhost:8000/sse"
+      "command": "npx",
+      "args": ["mcp-remote", "http://localhost:8000/mcp"]
     }
   }
 }
@@ -224,9 +225,9 @@ All settings are read from **environment variables** (or a `.env` file).
 
 | Variable    | Default     | Description                                           |
 | ----------- | ----------- | ----------------------------------------------------- |
-| `TRANSPORT` | `stdio`     | Transport mode: `stdio` or `sse`                      |
+| `TRANSPORT` | `stdio`     | Transport mode: `stdio` or `streamable_http`          |
 | `HOST`      | `127.0.0.1` | Bind address (use `0.0.0.0` in Docker)                |
-| `PORT`      | `8000`      | HTTP port (SSE only)                                  |
+| `PORT`      | `8000`      | HTTP port (`streamable_http` only)                    |
 | `LOG_LEVEL` | `INFO`      | Python log level: `DEBUG`, `INFO`, `WARNING`, `ERROR` |
 
 ---
@@ -412,7 +413,7 @@ uv run pytest -m ""                    # unit + integration
 docker compose logs ard-mcp
 ```
 
-Common causes: wrong `TRANSPORT` value (must be `sse` in Docker), port already in use.
+Common causes: wrong `TRANSPORT` value (must be `streamable_http` in Docker), port already in use.
 
 ### API timeouts
 

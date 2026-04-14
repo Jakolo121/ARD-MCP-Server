@@ -41,7 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Initial release
 - MCP tools: `get_latest_news`, `get_news_by_ressort`, `get_regional_news`, `search_news`, `get_news`, `get_channels`
 - MCP resources: `tagesschau://homepage`, `tagesschau://news/{ressort}`, `tagesschau://regional/{region_id}`, `tagesschau://search/{query}`, `tagesschau://channels`
-- `stdio` and `sse` / `streamable_http` transport support
+- `stdio`, `sse`, and `streamable_http` transport support
 - Environment-variable-driven configuration (`config.py`)
 - `httpx`-based async HTTP client with structured error handling
 

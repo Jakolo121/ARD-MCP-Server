@@ -8,8 +8,8 @@
 # Build:
 #   docker build -t ard-mcp .
 #
-# Run (SSE / remote):
-#   docker run -p 8000:8000 -e TRANSPORT=sse ard-mcp
+# Run (Streamable HTTP / remote):
+#   docker run -p 8000:8000 -e TRANSPORT=streamable_http ard-mcp
 # =============================================================================
 
 # ── Stage 1: builder ──────────────────────────────────────────────────────────
@@ -21,9 +21,16 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 WORKDIR /app
 
 # Copy dependency manifests first (layer-cache friendly)
-COPY pyproject.toml uv.lock ./
+COPY pyproject.toml uv.lock  README.md ./
 
 # Install production dependencies into /app/.venv (no dev extras)
+RUN uv sync --frozen --no-dev --no-install-project
+
+# Copy application source
+COPY src/ ./src/
+COPY main.py ./
+
+# Lokales Paket installieren
 RUN uv sync --frozen --no-dev
 
 # ── Stage 2: runtime ─────────────────────────────────────────────────────────
@@ -47,7 +54,7 @@ ENV PATH="/app/.venv/bin:$PATH" \
     PYTHONDONTWRITEBYTECODE=1
 
 # ── Runtime defaults (override via -e or docker-compose env_file) ─────────────
-ENV TRANSPORT=sse \
+ENV TRANSPORT=streamable_http \
     HOST=0.0.0.0 \
     PORT=8000 \
     LOG_LEVEL=INFO

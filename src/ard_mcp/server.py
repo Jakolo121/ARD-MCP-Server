@@ -46,8 +46,6 @@ logger = logging.getLogger(__name__)
 # ---------------------------------------------------------------------------
 mcp = FastMCP(
     name="Tagesschau News API",
-    host=config.HOST,
-    port=config.PORT,
 )
 
 # ---------------------------------------------------------------------------
@@ -184,7 +182,7 @@ def run() -> None:
     Supported transports:
         stdio           – local Claude Desktop / CLI usage (default)
         sse             – Server-Sent Events for remote / Docker deployments
-        streamable_http – HTTP streaming (falls back to sse for older FastMCP)
+        streamable_http – Streamable HTTP, stateless, endpoint: /mcp
     """
     logger.info(
         "Starting Tagesschau MCP server — transport=%s host=%s port=%d",
@@ -193,16 +191,9 @@ def run() -> None:
         config.PORT,
     )
 
-    transport = config.TRANSPORT
-    # FastMCP currently supports "stdio" and "sse".
-    # "streamable_http" is mapped to "sse" for forward compatibility.
-    if transport == "streamable_http":
-        logger.info(
-            "Transport 'streamable_http' mapped to 'sse' for FastMCP compatibility"
-        )
-        transport = "sse"
-
-    if transport == "stdio":
+    if config.TRANSPORT == "stdio":
         mcp.run(transport="stdio")
-    else:
-        mcp.run(transport="sse")
+    elif config.TRANSPORT == "sse":
+        mcp.run(transport="sse", host=config.HOST, port=config.PORT)
+    else:  # streamable_http
+        mcp.run(transport="http", host=config.HOST, port=config.PORT, stateless_http=True)

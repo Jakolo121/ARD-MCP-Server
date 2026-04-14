@@ -55,7 +55,7 @@ Die API stammt von [Tagesschau](https://tagesschau.api.bund.dev).
 | **Live-Nachrichten** | Aktuelle Meldungen, kategorisiert, regional, in Echtzeit  |
 | **Volltextsuche**    | Über alle verfügbaren Artikel                             |
 | **Livestreams**      | Alle Tagesschau-Kanäle mit HLS-URLs                       |
-| **Dual-Transport**   | `stdio` lokal; `sse` für Remote und Docker                |
+| **Dual-Transport**   | `stdio` lokal; `streamable_http` für Remote und Docker    |
 | **Docker**           | Multi-Stage-Build, Nicht-Root-User, Health-Checks, Limits |
 | **124 Tests**        | Unit-Tests (< 0,3 s) + Live-Integrationstests             |
 | **Makefile**         | `make test`, `make lint`, `make docker-build`             |
@@ -163,7 +163,7 @@ Frage KI-Assistenten:
 
 ## Remote / Docker-Deployment
 
-Der `sse`-Transport nutzt HTTP. Geeigent Ffr Server, Cloud-VMs oder Multi-Client-Setup.
+Der `streamable_http`-Transport nutzt HTTP. Geeignet für Server, Cloud-VMs oder Multi-Client-Setup. Stateless! Legacy sse wird noch supportet!
 
 ### Voraussetzungen
 
@@ -205,14 +205,13 @@ Oder:
 make docker-logs
 ```
 
-### Schritt 4: Claude Desktop anpassen (SSE)
+### Schritt 4: Claude Desktop anpassen (Streamable HTTP)
 
 ```json
-
     "tagesschau": {
-      "url": "http://localhost:8000/sse"
+      "command": "npx",
+      "args": ["mcp-remote", "http://localhost:8000/mcp"]
     },
-
 ```
 
 Für externe Server: `localhost` durch IP oder Domain ersetzen, Port 8000 freigeben.
@@ -230,11 +229,11 @@ docker compose up --build -d
 
 Alle Einstellungen kommen aus Umgebungsvariablen oder `.env`.
 
-| Variable    | Standard | Beschreibung                |
-| ----------- | -------- | --------------------------- |
-| `TRANSPORT` | `stdio`  | `stdio` oder `sse`          |
-| `PORT`      | `8000`   | HTTP-Port (nur SSE)         |
-| `LOG_LEVEL` | `INFO`   | DEBUG, INFO, WARNING, ERROR |
+| Variable    | Standard | Beschreibung                      |
+| ----------- | -------- | --------------------------------- |
+| `TRANSPORT` | `stdio`  | `stdio` oder `streamable_http`    |
+| `PORT`      | `8000`   | HTTP-Port (nur `streamable_http`) |
+| `LOG_LEVEL` | `INFO`   | DEBUG, INFO, WARNING, ERROR       |
 
 ---
 
@@ -460,7 +459,7 @@ Oder:
 make docker-logs
 ```
 
-Häufig: falscher `TRANSPORT` (in Docker muss es `sse` sein), oder Port belegt.
+Häufig: falscher `TRANSPORT` (in Docker muss es `streamable_http` sein), oder Port belegt.
 
 ### API-Timeouts
 
