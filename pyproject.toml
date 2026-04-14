@@ -1,6 +1,6 @@
 [project]
 name = "ard-mcp"
-version = "0.2.0"
+version = "2.0.0"
 description = "A MCP Server that brings the latest ARD/Tagesschau news into your AI chat application."
 readme = "README.md"
 license = { text = "Apache-2.0" }
