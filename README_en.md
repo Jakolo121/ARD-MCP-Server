@@ -20,7 +20,7 @@ Language:
 1. [What is this?](#what-is-this)
 2. [Features](#features)
 3. [Project Structure](#project-structure)
-4. [Quick Start — Local (Claude Desktop)](#quick-start--local-claude-desktop)
+4. [Quick Start Local deployment (Example: claude Desktop](#quick-start--local-claude-desktop)
 5. [Remote / Docker Deployment](#remote--docker-deployment)
 6. [Configuration Reference](#configuration-reference)
 7. [Available Tools](#available-tools)
