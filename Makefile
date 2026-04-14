@@ -14,7 +14,7 @@
 #   make clean         — remove build artefacts and caches
 # =============================================================================
 
-.PHONY: test test-all lint check run run-http docker-build docker-run docker-stop clean help
+.PHONY: test test-all lint check run run-http docker-build docker-run docker-stop docker-logs docker-push k3s-apply k3s-delete k3s-status k3s-logs clean help
 
 # ---------------------------------------------------------------------------
 # Local development
@@ -41,11 +41,16 @@ run-http:
 # Docker
 # ---------------------------------------------------------------------------
 
-IMAGE_NAME ?= ard-mcp
-IMAGE_TAG  ?= latest
+IMAGE_NAME  ?= ard-mcp
+IMAGE_TAG   ?= latest
+GHCR_IMAGE  ?= ghcr.io/jakolo121/ard-mcp
 
 docker-build:
 	docker build -t $(IMAGE_NAME):$(IMAGE_TAG) .
+
+docker-push:
+	docker build -t $(GHCR_IMAGE):$(IMAGE_TAG) .
+	docker push $(GHCR_IMAGE):$(IMAGE_TAG)
 
 docker-run:
 	docker compose up -d
@@ -55,6 +60,22 @@ docker-stop:
 
 docker-logs:
 	docker compose logs -f ard-mcp
+
+# ---------------------------------------------------------------------------
+# k3s / Kubernetes
+# ---------------------------------------------------------------------------
+
+k3s-apply:
+	kubectl apply -k k3s/
+
+k3s-delete:
+	kubectl delete -k k3s/
+
+k3s-status:
+	kubectl get pods,svc,ingress,hpa -n ard-mcp
+
+k3s-logs:
+	kubectl logs -n ard-mcp -l app=ard-mcp -f --max-log-requests 5
 
 # ---------------------------------------------------------------------------
 # Cleanup
@@ -85,5 +106,10 @@ help:
 	@echo "  docker-run    Start via Docker Compose"
 	@echo "  docker-stop   Stop Docker Compose services"
 	@echo "  docker-logs   Tail Docker Compose logs"
+	@echo "  docker-push   Build and push image to ghcr.io"
+	@echo "  k3s-apply     Apply all k8s manifests"
+	@echo "  k3s-delete    Delete all k8s resources"
+	@echo "  k3s-status    Show pods, services, ingress, HPA"
+	@echo "  k3s-logs      Tail logs of all ard-mcp pods"
 	@echo "  clean         Remove build artefacts and caches"
 	@echo ""

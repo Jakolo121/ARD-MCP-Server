@@ -12,6 +12,8 @@ import logging.config
 from typing import Optional
 
 from fastmcp import FastMCP
+from starlette.requests import Request
+from starlette.responses import JSONResponse
 
 from ard_mcp import config
 from ard_mcp.resources import (
@@ -169,6 +171,17 @@ async def search_resource(search_text: str) -> str:
 async def channels_resource() -> str:
     """Get information about available Tagesschau channels and livestreams."""
     return await resource_channels()
+
+
+# ---------------------------------------------------------------------------
+# Health check — used by Docker HEALTHCHECK and k8s liveness/readiness probes
+# ---------------------------------------------------------------------------
+
+
+@mcp.custom_route("/health", methods=["GET"])
+async def health_check(_request: Request) -> JSONResponse:
+    """Return 200 OK so orchestrators can verify the server is alive."""
+    return JSONResponse({"status": "ok"})
 
 
 # ---------------------------------------------------------------------------

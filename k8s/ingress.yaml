@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ard-mcp
+  namespace: ard-mcp
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - YOUR_DOMAIN                      # <-- anpassen, z.B. mcp.example.com
+      secretName: ard-mcp-tls
+  rules:
+    - host: YOUR_DOMAIN                    # <-- anpassen
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ard-mcp
+                port:
+                  number: 8000
