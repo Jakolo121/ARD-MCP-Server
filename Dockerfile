@@ -13,7 +13,7 @@
 # =============================================================================
 
 # ── Stage 1: builder ──────────────────────────────────────────────────────────
-FROM python:3.12-slim AS builder
+FROM python:3.12-slim-bookworm AS builder
 
 # Install uv (fast Python package manager)
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
@@ -34,10 +34,12 @@ COPY main.py ./
 RUN uv sync --frozen --no-dev
 
 # ── Stage 2: runtime ─────────────────────────────────────────────────────────
-FROM python:3.12-slim AS runtime
+FROM python:3.12-slim-bookworm AS runtime
 
 # Create a non-root user for security
 RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
+
+RUN apt-get update && apt-get upgrade -y --no-install-recommends && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
