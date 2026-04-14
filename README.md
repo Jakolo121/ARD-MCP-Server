@@ -1,7 +1,7 @@
 # ARD / Tagesschau MCP Server
 
 > Verbinde deinen KI-Assistenten direkt mit aktuellen Nachrichten.  
-> Ein produktionsreifer [Model Context Protocol (MCP)](https://modelcontextprotocol.io)-Server, der die öffentliche Tagesschau-API nutzt — vom Quick Start bis zur Docker-Produktion.
+> Ein produktionsreifer [Model Context Protocol (MCP)](https://modelcontextprotocol.io)-Server, der die öffentliche Tagesschau-API nutzt.
 
 ![pylint](https://img.shields.io/badge/pylint-10.00%2F10-brightgreen)
 ![tests](https://img.shields.io/badge/tests-124%20passed-brightgreen)
