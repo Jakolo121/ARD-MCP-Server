@@ -61,6 +61,20 @@ class TestToolGetLatestNewsMock:
         assert "# Item 2" in result
         assert "# Item 3" not in result
 
+    async def test_limit_zero_returns_hint(self):
+        """limit=0 must return a human-readable hint, not 'no items found'."""
+        result = await tool_get_latest_news(limit=0)
+        assert "limit=0" in result
+        assert "≥ 1" in result
+
+    async def test_high_limit_adds_cap_note(self, news_item):
+        """A limit above the API maximum must append a note about the cap."""
+        items = [dict(news_item, title=f"Item {i}") for i in range(50)]
+        with patch(FETCH_PATH, AsyncMock(return_value={"news": items})):
+            result = await tool_get_latest_news(limit=100)
+        assert "API maximum" in result
+        assert "50" in result
+
 
 class TestToolGetNewsByRessortMock:
     """Unit tests for tool_get_news_by_ressort()."""
@@ -133,6 +147,27 @@ class TestToolGetRegionalNewsMock:
         with patch(GET_NEWS_PATH, AsyncMock(return_value=payload)):
             result = await tool_get_regional_news(3, ressort="inland")
         assert "Testmeldung" in result
+
+    async def test_with_valid_ressort_shows_warning(self, news_item):
+        """Combining region + ressort must prepend the API-limitation warning."""
+        payload = {"items": [news_item]}
+        with patch(GET_NEWS_PATH, AsyncMock(return_value=payload)):
+            result = await tool_get_regional_news(2, ressort="wirtschaft")
+        assert "API limitation" in result
+        assert "ressort only" in result
+
+    async def test_region_only_no_warning(self, news_item):
+        """Using only a region (no ressort) must NOT show the warning."""
+        payload = {"items": [news_item]}
+        with patch(GET_NEWS_PATH, AsyncMock(return_value=payload)):
+            result = await tool_get_regional_news(2)
+        assert "API limitation" not in result
+
+    async def test_limit_zero_returns_hint(self):
+        """limit=0 must return a human-readable hint, not 'Invalid region' or 'no items'."""
+        result = await tool_get_regional_news(2, limit=0)
+        assert "limit=0" in result
+        assert "≥ 1" in result
 
     async def test_empty_regional_news(self):
         """An empty regional news list must produce a 'no regional news' message."""
@@ -226,6 +261,42 @@ class TestToolGetNewsMock:
         with patch(GET_NEWS_PATH, AsyncMock(return_value=payload)):
             result = await tool_get_news(regions="3", ressort="inland")
         assert "Testmeldung" in result
+
+    async def test_region_and_ressort_together_shows_warning(self, news_item):
+        """Combining region and ressort must prepend the API-limitation warning."""
+        payload = {"items": [news_item]}
+        with patch(GET_NEWS_PATH, AsyncMock(return_value=payload)):
+            result = await tool_get_news(regions="2", ressort="wirtschaft")
+        assert "API limitation" in result
+        assert "ressort only" in result
+
+    async def test_region_only_no_warning(self, news_item):
+        """Using only a region must NOT show the API-limitation warning."""
+        payload = {"items": [news_item]}
+        with patch(GET_NEWS_PATH, AsyncMock(return_value=payload)):
+            result = await tool_get_news(regions="2")
+        assert "API limitation" not in result
+
+    async def test_ressort_only_no_warning(self, news_item):
+        """Using only a ressort must NOT show the API-limitation warning."""
+        payload = {"items": [news_item]}
+        with patch(GET_NEWS_PATH, AsyncMock(return_value=payload)):
+            result = await tool_get_news(ressort="inland")
+        assert "API limitation" not in result
+
+    async def test_limit_zero_returns_hint(self):
+        """limit=0 must return a human-readable hint, not 'no items found'."""
+        result = await tool_get_news(limit=0)
+        assert "limit=0" in result
+        assert "≥ 1" in result
+
+    async def test_high_limit_adds_cap_note(self, news_item):
+        """A limit above the API maximum must append a note about the cap."""
+        items = [dict(news_item, title=f"Item {i}") for i in range(50)]
+        with patch(GET_NEWS_PATH, AsyncMock(return_value={"items": items})):
+            result = await tool_get_news(limit=100)
+        assert "API maximum" in result
+        assert "50" in result
 
     async def test_empty_result_message(self):
         """An empty items list must produce a 'no items' message."""

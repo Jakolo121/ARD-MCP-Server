@@ -19,6 +19,19 @@ __all__ = ["VALID_RESSORTS", "VALID_REGION_IDS", "validate_ressort"]
 
 logger = logging.getLogger(__name__)
 
+# The Tagesschau /api2u/news endpoint returns at most this many items per call.
+_API_MAX_NEWS_ITEMS = 50
+
+# Advisory notice prepended when both regions AND ressort are requested.
+# Verified 2025-04: the upstream API silently ignores `regions` when `ressort`
+# is present — only ressort-filtered results are returned.
+_REGION_RESSORT_WARNING = (
+    "> ⚠️ **API limitation:** The Tagesschau API does not support filtering by "
+    "both region and ressort simultaneously. The `regions` parameter is silently "
+    "ignored by the upstream API when `ressort` is set. "
+    "Showing results filtered by **ressort only**.\n\n"
+)
+
 
 # ---------------------------------------------------------------------------
 # Tool implementations
@@ -28,13 +41,25 @@ logger = logging.getLogger(__name__)
 async def tool_get_latest_news(limit: int = 10) -> str:
     """Return the latest headlines from the Tagesschau homepage."""
     logger.info("tool_get_latest_news limit=%d", limit)
+
+    if limit <= 0:
+        return "ℹ️ limit=0 — no items requested. Please specify a limit ≥ 1."
+
     response = await fetch_from_api(ENDPOINTS["homepage"])
 
     if "error" in response:
         return f"Error fetching news: {response['message']}"
 
     news_items = response.get("news", [])
-    return format_news_list(news_items, limit)
+    result = format_news_list(news_items, limit)
+
+    if limit > _API_MAX_NEWS_ITEMS:
+        result += (
+            f"\n\n>Requested limit {limit} exceeds the API maximum of"
+            f" {_API_MAX_NEWS_ITEMS} items per request."
+        )
+
+    return result
 
 
 async def tool_get_news_by_ressort(ressort: str, limit: int = 10) -> str:
@@ -47,6 +72,9 @@ async def tool_get_news_by_ressort(ressort: str, limit: int = 10) -> str:
     """
     logger.info("tool_get_news_by_ressort ressort=%s limit=%d", ressort, limit)
 
+    if limit <= 0:
+        return "ℹ️ limit=0 — no items requested. Please specify a limit ≥ 1."
+
     error = validate_ressort(ressort)
     if error:
         return error
@@ -58,7 +86,15 @@ async def tool_get_news_by_ressort(ressort: str, limit: int = 10) -> str:
     if not result["items"]:
         return f"No news items found for ressort '{ressort}'."
 
-    return format_news_list(result["items"], limit)
+    formatted = format_news_list(result["items"], limit)
+
+    if limit > _API_MAX_NEWS_ITEMS:
+        formatted += (
+            f"\n\n>Requested limit {limit} exceeds the API maximum of"
+            f" {_API_MAX_NEWS_ITEMS} items per request."
+        )
+
+    return formatted
 
 
 async def tool_get_regional_news(
@@ -80,6 +116,9 @@ async def tool_get_regional_news(
         limit,
     )
 
+    if limit <= 0:
+        return "ℹ️ limit=0 — no items requested. Please specify a limit ≥ 1."
+
     if region_id not in VALID_REGION_IDS:
         return f"Invalid region ID: {region_id}. Valid options are 1–16."
 
@@ -98,7 +137,18 @@ async def tool_get_regional_news(
     if not result["items"]:
         return f"No regional news items found for region {region_id}."
 
-    return format_news_list(result["items"], limit)
+    formatted = format_news_list(result["items"], limit)
+
+    if ressort is not None:
+        formatted = _REGION_RESSORT_WARNING + formatted
+
+    if limit > _API_MAX_NEWS_ITEMS:
+        formatted += (
+            f"\n\n>Requested limit {limit} exceeds the API maximum of"
+            f" {_API_MAX_NEWS_ITEMS} items per request."
+        )
+
+    return formatted
 
 
 async def tool_search_news(
@@ -191,6 +241,9 @@ async def tool_get_news(
         "tool_get_news regions=%s ressort=%s limit=%d", regions, ressort, limit
     )
 
+    if limit <= 0:
+        return "ℹ️ limit=0 — no items requested. Please specify a limit ≥ 1."
+
     params = {}
 
     if regions is not None:
@@ -217,7 +270,18 @@ async def tool_get_news(
     if not result["items"]:
         return "No news items found."
 
-    return format_news_list(result["items"], limit)
+    formatted = format_news_list(result["items"], limit)
+
+    if regions is not None and ressort is not None:
+        formatted = _REGION_RESSORT_WARNING + formatted
+
+    if limit > _API_MAX_NEWS_ITEMS:
+        formatted += (
+            f"\n\n>Requested limit {limit} exceeds the API maximum of"
+            f" {_API_MAX_NEWS_ITEMS} items per request."
+        )
+
+    return formatted
 
 
 async def tool_get_channels() -> str:
