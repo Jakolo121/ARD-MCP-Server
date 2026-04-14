@@ -1,7 +1,7 @@
 # 🎙️ ARD / Tagesschau MCP Server
 
 > **Bring live German news directly into your AI chat.**  
-> A production-ready [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server that wraps the public Tagesschau API — from a single command to full Docker deployment.
+> A production-ready [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server that wraps the public Tagesschau API. This README assists you from a local to full Docker deployment.
 
 ![pylint](https://img.shields.io/badge/pylint-10.00%2F10-brightgreen)
 ![tests](https://img.shields.io/badge/tests-124%20passed-brightgreen)
