@@ -7,6 +7,7 @@ server.py.  This decoupling makes the logic independently testable without
 needing a running FastMCP instance.
 """
 
+import asyncio
 import logging
 from typing import Optional
 
@@ -234,6 +235,10 @@ async def tool_get_news(
 ) -> str:
     """Flexible news fetcher — region and/or category are optional.
 
+    When both are supplied the upstream API silently ignores `regions`.
+    This tool works around that by fetching each filter independently and
+    computing the intersection client-side via sophoraId.
+
     Args:
         regions: Region ID as string (1–16), optional.
         ressort: Category, optional.
@@ -246,24 +251,55 @@ async def tool_get_news(
     if limit <= 0:
         return "ℹ️ limit=0 — no items requested. Please specify a limit ≥ 1."
 
-    params = {}
-
     if regions is not None:
         try:
             region_id = int(regions)
         except ValueError:
             return f"Invalid region ID: {regions!r}. Must be a number between 1 and 16."
-
         if region_id not in VALID_REGION_IDS:
             return f"Invalid region ID: {region_id}. Valid options are 1–16."
-
-        params["regions"] = regions
 
     if ressort is not None:
         ressort = normalise_ressort(ressort)
         error = validate_ressort(ressort)
         if error:
             return error
+
+    # When BOTH region AND ressort are requested: fetch each independently and
+    # intersect client-side by sophoraId to work around the API limitation.
+    if regions is not None and ressort is not None:
+        regional_result, ressort_result = await asyncio.gather(
+            get_news({"regions": regions}, _API_MAX_NEWS_ITEMS),
+            get_news({"ressort": ressort}, _API_MAX_NEWS_ITEMS),
+        )
+
+        if "error" in regional_result:
+            return f"Error fetching regional news: {regional_result['message']}"
+        if "error" in ressort_result:
+            return f"Error fetching ressort news: {ressort_result['message']}"
+
+        ressort_ids = {
+            item["sophoraId"]
+            for item in ressort_result["items"]
+            if "sophoraId" in item
+        }
+        intersection = [
+            item for item in regional_result["items"]
+            if item.get("sophoraId") in ressort_ids
+        ]
+
+        if not intersection:
+            return (
+                f"No news items found matching both region '{regions}' "
+                f"and ressort '{ressort}'."
+            )
+
+        return format_news_list(intersection, limit)
+
+    params: dict = {}
+    if regions is not None:
+        params["regions"] = regions
+    if ressort is not None:
         params["ressort"] = ressort
 
     result = await get_news(params if params else None, limit)
@@ -274,9 +310,6 @@ async def tool_get_news(
         return "No news items found."
 
     formatted = format_news_list(result["items"], limit)
-
-    if regions is not None and ressort is not None:
-        formatted = _REGION_RESSORT_WARNING + formatted
 
     if limit > _API_MAX_NEWS_ITEMS:
         formatted += (

@@ -269,20 +269,61 @@ class TestToolGetNewsMock:
         result = await tool_get_news(ressort="invalid_cat")
         assert "Invalid ressort" in result
 
-    async def test_valid_region_and_ressort(self, news_item):
-        """Combining a valid region and ressort must return filtered news."""
+    async def test_valid_region_and_ressort_intersection(self, news_item):
+        """Combining region and ressort must return items that appear in both."""
+        # Both calls return the same item → intersection is non-empty.
         payload = {"items": [news_item]}
-        with patch(GET_NEWS_PATH, AsyncMock(return_value=payload)):
+        mock = AsyncMock(side_effect=[payload, payload])
+        with patch(GET_NEWS_PATH, mock):
             result = await tool_get_news(regions="3", ressort="inland")
         assert "Testmeldung" in result
 
-    async def test_region_and_ressort_together_shows_warning(self, news_item):
-        """Combining region and ressort must prepend the API-limitation warning."""
+    async def test_region_and_ressort_no_api_limitation_warning(self, news_item):
+        """Combining region and ressort must NOT show the old API-limitation warning
+        — the intersection approach resolves the limitation transparently."""
         payload = {"items": [news_item]}
-        with patch(GET_NEWS_PATH, AsyncMock(return_value=payload)):
+        mock = AsyncMock(side_effect=[payload, payload])
+        with patch(GET_NEWS_PATH, mock):
             result = await tool_get_news(regions="2", ressort="wirtschaft")
-        assert "API limitation" in result
-        assert "ressort only" in result
+        assert "API limitation" not in result
+
+    async def test_intersection_empty_returns_message(self, news_item):
+        """When region and ressort results share no sophoraIds, return a clear message."""
+        regional_payload = {"items": [news_item]}   # sophoraId: "abc123"
+        ressort_payload = {"items": [{"sophoraId": "other-id", "title": "Other"}]}
+        mock = AsyncMock(side_effect=[regional_payload, ressort_payload])
+        with patch(GET_NEWS_PATH, mock):
+            result = await tool_get_news(regions="2", ressort="wirtschaft")
+        assert "No news items found" in result
+        assert "region" in result
+        assert "ressort" in result
+
+    async def test_intersection_excludes_items_without_sophora_id(self):
+        """Items without sophoraId in the ressort set must not cause false matches."""
+        regional_item = {"title": "Regional item"}       # no sophoraId
+        ressort_item = {"title": "Ressort item"}          # no sophoraId
+        regional_payload = {"items": [regional_item]}
+        ressort_payload = {"items": [ressort_item]}
+        mock = AsyncMock(side_effect=[regional_payload, ressort_payload])
+        with patch(GET_NEWS_PATH, mock):
+            result = await tool_get_news(regions="1", ressort="sport")
+        assert "No news items found" in result
+
+    async def test_region_ressort_regional_error_propagated(self, error_response, news_item):
+        """An error from the regional fetch must be surfaced as an error message."""
+        ressort_payload = {"items": [news_item]}
+        mock = AsyncMock(side_effect=[error_response, ressort_payload])
+        with patch(GET_NEWS_PATH, mock):
+            result = await tool_get_news(regions="1", ressort="inland")
+        assert "Error" in result
+
+    async def test_region_ressort_ressort_error_propagated(self, error_response, news_item):
+        """An error from the ressort fetch must be surfaced as an error message."""
+        regional_payload = {"items": [news_item]}
+        mock = AsyncMock(side_effect=[regional_payload, error_response])
+        with patch(GET_NEWS_PATH, mock):
+            result = await tool_get_news(regions="1", ressort="inland")
+        assert "Error" in result
 
     async def test_region_only_no_warning(self, news_item):
         """Using only a region must NOT show the API-limitation warning."""
@@ -409,5 +450,13 @@ class TestToolsLive:
         # Should not return an error even if news list is empty
         assert "Invalid" not in result
         # Skip gracefully if the API times out (transient network issue)
+        if "Error fetching" in result:
+            pytest.skip("Tagesschau API timed out — transient network issue")
+
+    async def test_get_news_region_and_ressort_live(self):
+        """Live region+ressort intersection must not error and must not show the old warning."""
+        result = await tool_get_news(regions="2", ressort="inland", limit=5)
+        assert "Invalid" not in result
+        assert "API limitation" not in result
         if "Error fetching" in result:
             pytest.skip("Tagesschau API timed out — transient network issue")
