@@ -62,4 +62,5 @@ docker-compose.override.yml
 logs/
 *.log
 CLAUDE.md
+.claude
 
