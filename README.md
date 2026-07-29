@@ -332,11 +332,11 @@ URIs, die MCP-Clients lesen können.
 
 | URI                                 | Beschreibung               |
 | ----------------------------------- | -------------------------- |
-| `tagesschau://homepage`             | Top-Meldungen              |
-| `tagesschau://news/{ressort}`       | Nachrichten nach Kategorie |
-| `tagesschau://regional/{region_id}` | Regionalnachrichten        |
-| `tagesschau://search/{search_text}` | Suchergebnisse             |
-| `tagesschau://channels`             | Kanäle & Streams           |
+| `news://tagesschau/homepage`             | Top-Meldungen              |
+| `news://tagesschau/news/{ressort}`       | Nachrichten nach Kategorie |
+| `news://tagesschau/regional/{region_id}` | Regionalnachrichten        |
+| `news://tagesschau/search/{search_text}` | Suchergebnisse             |
+| `news://tagesschau/channels`             | Kanäle & Streams           |
 
 ---
 

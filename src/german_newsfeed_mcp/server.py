@@ -138,31 +138,31 @@ async def get_channels() -> str:
 # ---------------------------------------------------------------------------
 
 
-@mcp.resource("tagesschau://homepage")
+@mcp.resource("news://tagesschau/homepage")
 async def homepage_resource() -> str:
     """Get the homepage content from Tagesschau."""
     return await resource_homepage(api_client)
 
 
-@mcp.resource("tagesschau://news/{ressort}")
+@mcp.resource("news://tagesschau/news/{ressort}")
 async def news_by_ressort_resource(ressort: str) -> str:
     """Get news by ressort/category."""
     return await resource_news_by_ressort(api_client, ressort)
 
 
-@mcp.resource("tagesschau://regional/{region_id}")
+@mcp.resource("news://tagesschau/regional/{region_id}")
 async def regional_news_resource(region_id: str) -> str:
     """Get regional news for a specific German state."""
     return await resource_regional_news(api_client, region_id)
 
 
-@mcp.resource("tagesschau://search/{search_text}")
+@mcp.resource("news://tagesschau/search/{search_text}")
 async def search_resource(search_text: str) -> str:
     """Search for news articles by keyword."""
     return await resource_search(api_client, search_text)
 
 
-@mcp.resource("tagesschau://channels")
+@mcp.resource("news://tagesschau/channels")
 async def channels_resource() -> str:
     """Get information about available Tagesschau channels and livestreams."""
     return await resource_channels(api_client)

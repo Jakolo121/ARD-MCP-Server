@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 async def resource_homepage(api: NewsApiClient) -> str:
-    """Return the current Tagesschau homepage news (tagesschau://homepage)."""
+    """Return the current Tagesschau homepage news (news://tagesschau/homepage)."""
     logger.info("resource_homepage")
     response = await api.fetch_from_api(ENDPOINTS["homepage"])
 
@@ -34,7 +34,7 @@ async def resource_homepage(api: NewsApiClient) -> str:
 
 
 async def resource_news_by_ressort(api: NewsApiClient, ressort: str) -> str:
-    """Return news for a category (tagesschau://news/{ressort}).
+    """Return news for a category (news://tagesschau/news/{ressort}).
 
     Args:
         api:     Injected client for upstream API access.
@@ -58,7 +58,7 @@ async def resource_regional_news(
     region_id: str,
     ressort: Optional[str] = None,
 ) -> str:
-    """Return regional news (tagesschau://regional/{region_id}).
+    """Return regional news (news://tagesschau/regional/{region_id}).
 
     Args:
         api:       Injected client for upstream API access.
@@ -97,7 +97,7 @@ async def resource_search(
     page_size: Optional[int] = None,
     result_page: Optional[int] = None,
 ) -> str:
-    """Return search results (tagesschau://search/{search_text}).
+    """Return search results (news://tagesschau/search/{search_text}).
 
     Args:
         api:         Injected client for upstream API access.
@@ -136,7 +136,7 @@ async def resource_search(
 
 
 async def resource_channels(api: NewsApiClient) -> str:
-    """Return channel information (tagesschau://channels).
+    """Return channel information (news://tagesschau/channels).
 
     Args:
         api: Injected client for upstream API access.

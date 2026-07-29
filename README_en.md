@@ -330,11 +330,11 @@ Resources are addressable URIs that MCP clients can read directly.
 
 | URI                                 | Description                  |
 | ----------------------------------- | ---------------------------- |
-| `tagesschau://homepage`             | Homepage top stories         |
-| `tagesschau://news/{ressort}`       | News by category             |
-| `tagesschau://regional/{region_id}` | Regional news by state ID    |
-| `tagesschau://search/{search_text}` | Search results               |
-| `tagesschau://channels`             | Available channels & streams |
+| `news://tagesschau/homepage`             | Homepage top stories         |
+| `news://tagesschau/news/{ressort}`       | News by category             |
+| `news://tagesschau/regional/{region_id}` | Regional news by state ID    |
+| `news://tagesschau/search/{search_text}` | Search results               |
+| `news://tagesschau/channels`             | Available channels & streams |
 
 ---
 
