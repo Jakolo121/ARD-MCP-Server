@@ -1,16 +1,18 @@
-# 🎙️ ARD / Tagesschau MCP Server
+# German Newsfeed MCP Server
 
-> **Bring live German news directly into your AI chat.**  
-> A production-ready [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server that wraps the public Tagesschau API. This README assists you from a local to full Docker deployment.
+> **Disclaimer:** This is an unofficial project. It has no affiliation with ARD, ARD-aktuell, or NDR; it is neither operated nor endorsed nor approved by them. "ARD" and "tagesschau" are trademarks of their respective owners and are referenced here solely to describe the API this server talks to.
 
-![pylint](https://img.shields.io/badge/pylint-10.00%2F10-brightgreen)
-![tests](https://img.shields.io/badge/tests-124%20passed-brightgreen)
+> MCP server for the public news API of tagesschau.de.  
+> A production-ready [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server that brings live German news into your AI assistant.
+
+![pylint](https://img.shields.io/badge/pylint-9.97%2F10-brightgreen)
+![tests](https://img.shields.io/badge/tests-181%20passed-brightgreen)
 ![python](https://img.shields.io/badge/python-3.12%2B-blue)
-![license](https://img.shields.io/badge/license-MIT-blue)
+![license](https://img.shields.io/badge/license-Apache%202.0-blue)
 
 Language:
 
-- 🇩🇪 [Deutsch] (README_en.md)
+- 🇩🇪 [Deutsch](README.md)
 - 🇬🇧 English
 
 ---
@@ -18,23 +20,25 @@ Language:
 ## Table of Contents
 
 1. [What is this?](#what-is-this)
-2. [Features](#features)
-3. [Project Structure](#project-structure)
-4. [Quick Start Local deployment (Example: claude Desktop](#quick-start--local-claude-desktop)
-5. [Remote / Docker Deployment](#remote--docker-deployment)
-6. [Configuration Reference](#configuration-reference)
-7. [Available Tools](#available-tools)
-8. [Available Resources](#available-resources)
-9. [Development Guide](#development-guide)
-10. [Running the Tests](#running-the-tests)
-11. [Makefile Reference](#makefile-reference)
-12. [Troubleshooting](#troubleshooting)
+2. [Data Source and Terms of Use](#data-source-and-terms-of-use)
+3. [Features](#features)
+4. [Project Structure](#project-structure)
+5. [Quick Start Local (Claude Desktop)](#quick-start-local-claude-desktop)
+6. [Remote / Docker Deployment](#remote--docker-deployment)
+7. [Configuration Reference](#configuration-reference)
+8. [Available Tools](#available-tools)
+9. [Available Resources](#available-resources)
+10. [Development Guide](#development-guide)
+11. [Running the Tests](#running-the-tests)
+12. [Makefile Reference](#makefile-reference)
+13. [Troubleshooting](#troubleshooting)
+14. [License & Acknowledgements](#license--acknowledgements)
 
 ---
 
 ## What is this?
 
-This project is an MCP server that brings ARD News into a AI assistants (Claude, Open Claw etc.) can call at runtime. Let the machines acces your Content and you decide how they do!
+This MCP server connects the public news API of tagesschau.de to your AI assistant (Claude, Open Claw, etc.).
 
 Once connected, your AI can answer questions like:
 
@@ -43,22 +47,44 @@ Once connected, your AI can answer questions like:
 - _"Suche nach Artikeln über Ukraine."_
 - _"Welche Regionalnachrichten gibt es aus Bayern?"_
 
-All data comes from the official, public [Tagesschau API](https://www.tagesschau.de/api2u/) — no API key required.
+For details on the API and its terms, see [Data Source and Terms of Use](#data-source-and-terms-of-use). No API key required.
+
+---
+
+## Data Source and Terms of Use
+
+This server calls the publicly accessible endpoint
+`www.tagesschau.de/api2u/`, operated by ARD-aktuell. The delivered
+content originates from the ARD broadcasters, remains subject to their
+rights and to the terms of use of tagesschau.de:
+https://www.tagesschau.de/nutzungsbedingungen/
+
+The API is not officially documented. Community documentation is
+available at bund.dev (https://tagesschau.api.bund.dev). bund.dev is a
+civil-society documentation project — neither the operator of the API
+nor a rights holder of the content. Its documentation served as a
+reference for this project but does not grant any usage rights.
+
+Applicable limits: at most 60 requests per hour, and no republication
+of the content except for offerings under a CC licence
+(https://tagesschau.de/creativecommons). Compliance is the
+responsibility of whoever operates a given instance.
 
 ---
 
 ## Features
 
-|                         |                                                                         |
-| ----------------------- | ----------------------------------------------------------------------- |
-| 🗞️ **Live news**        | Fetches breaking news, categorised news, and regional news in real time |
-| 🔍 **Full-text search** | Search across all Tagesschau articles                                   |
-| 📺 **Live streams**     | List all available Tagesschau channels and HLS stream URLs              |
-| 🚀 **Dual transport**   | `stdio` for local Claude Desktop; `streamable_http` for remote / Docker |
-| 🐳 **Docker-ready**     | Multi-stage image, non-root user, health-check, resource limits         |
-| ✅ **124 unit tests**   | Full mock test suite + live integration tests, < 0.3 s                  |
-| 🛠️ **Makefile**         | `make test`, `make lint`, `make docker-build` and more                  |
-| 🔒 **No secrets**       | Zero external dependencies, no API keys                                 |
+|                      |                                                                          |
+| -------------------- | ------------------------------------------------------------------------ |
+| 🗞️ **Live news**     | Fetches breaking news, categorised news, and regional news in real time |
+| 🔍 **Full-text search** | Search across all available articles                                  |
+| 📺 **Live streams**  | List all available channels and HLS stream URLs                         |
+| ⏱️ **Rate limiter**  | Local token bucket honouring the API's 60/h limit                       |
+| 🚀 **Dual transport** | `stdio` for local Claude Desktop; `streamable_http` for remote / Docker |
+| 🐳 **Docker-ready**  | Multi-stage image, non-root user, health-check, resource limits         |
+| ✅ **181 tests**     | 160 unit tests + 21 live integration tests                              |
+| 🛠️ **Makefile**      | `make test`, `make lint`, `make docker-build` and more                   |
+| 🔒 **No secrets**    | Public API, no API keys                                                  |
 
 ---
 
@@ -68,20 +94,22 @@ All data comes from the official, public [Tagesschau API](https://www.tagesschau
 german-newsfeed-mcp/
 ├── src/
 │   └── german_newsfeed_mcp/
-│       ├── __init__.py      # Package metadata (__version__, __author__)
+│       ├── __init__.py      # Package metadata
 │       ├── config.py        # Environment-driven configuration
 │       ├── client.py        # Async HTTP client (httpx) + error handling
-│       ├── validators.py    # Domain constants + validate_ressort() helper
+│       ├── rate_limiter.py  # Token-bucket rate limiter
+│       ├── validators.py    # Domain constants + validation helpers
 │       ├── formatters.py    # Markdown rendering of news items & channels
 │       ├── tools.py         # MCP tool business logic
 │       ├── resources.py     # MCP resource business logic
-│       └── server.py        # FastMCP assembly + run() entry-point
+│       └── server.py        # Composition root: FastMCP + run() entry-point
 ├── tests/
 │   ├── conftest.py          # Shared fixtures & mock payloads
 │   ├── test_client.py       # Client unit + live integration tests
+│   ├── test_rate_limiter.py # Rate-limiter unit tests
 │   ├── test_formatters.py   # Formatter unit tests (pure functions)
 │   ├── test_tools.py        # Tool unit + live integration tests
-│   └── test_resources.py   # Resource unit + live integration tests
+│   └── test_resources.py    # Resource unit + live integration tests
 ├── main.py                  # Thin entry-point (calls server.run())
 ├── pyproject.toml           # Project metadata, deps, pytest & pylint config
 ├── uv.lock                  # Locked dependency graph (commit this!)
@@ -91,14 +119,14 @@ german-newsfeed-mcp/
 ├── Makefile                 # Developer shortcuts (test, lint, docker, clean)
 ├── CHANGELOG.md             # Version history
 ├── CONTRIBUTING.md          # How to contribute
-└── README.md                # This file
+└── README.md                # German version of this file
 ```
 
 ---
 
-## Quick Start Local (Claude Desktop but is applicable for other AI Assistents)
+## Quick Start Local (Claude Desktop)
 
-This mode uses `stdio` transport — the server is launched as a child process by Claude Desktop. No port is needed.
+Also applicable to other AI assistants — edit their respective config instead. This mode uses `stdio` transport; the server is launched as a child process. No port is needed.
 
 ### Prerequisites
 
@@ -112,8 +140,6 @@ This mode uses `stdio` transport — the server is launched as a child process b
 ```bash
 git clone https://github.com/Jakolo121/german-newsfeed-mcp.git
 cd german-newsfeed-mcp
-
-# Install all dependencies (uv creates .venv automatically)
 uv sync
 ```
 
@@ -121,7 +147,7 @@ uv sync
 
 ```bash
 uv run python -c "from german_newsfeed_mcp.server import mcp; print('OK —', mcp.name)"
-# Expected: OK — Tagesschau News API
+# Expected: OK — German Newsfeed MCP
 ```
 
 ### Step 3 — Connect Claude Desktop
@@ -137,9 +163,7 @@ Open your Claude Desktop config file:
 Add the following entry (adjust the path to your clone):
 
 ```json
-{
-  "mcpServers": {
-    "tagesschau": {
+    "german-newsfeed": {
       "command": "uv",
       "args": [
         "--directory",
@@ -147,26 +171,24 @@ Add the following entry (adjust the path to your clone):
         "run",
         "german-newsfeed-mcp"
       ]
-    }
-  }
-}
+    },
 ```
 
 ### Step 4 — Restart Claude Desktop
 
-Quit and reopen Claude Desktop. You should see a 🔌 icon in the toolbar indicating the MCP server is connected.
+Quit and reopen the application, or reload its MCP servers, depending on the application.
 
 ### Step 5 — Try it!
 
-Ask Claude:
+Ask your assistant:
 
-> _"Was sind die aktuellen Tagesschau-Nachrichten?"_
+> _"Was sind die aktuellen Nachrichten?"_
 
 ---
 
 ## Remote / Docker Deployment
 
-This mode uses `streamable_http` transport over HTTP. Ideal for servers, cloud VMs, or sharing the server across multiple clients. Stateless — no session state on the server, built for horizontal scaling.
+This mode uses `streamable_http` transport over HTTP. Ideal for servers, cloud VMs, or multi-client setups. Stateless! Legacy sse is still supported!
 
 ### Prerequisites
 
@@ -186,49 +208,60 @@ cp .env.example .env
 docker compose up --build -d
 ```
 
+Or:
+
+```bash
+make docker-build
+make docker-run
+```
+
 The server starts at `http://localhost:8000`.
 
 ### Step 3 — Verify health
 
 ```bash
-docker compose logs german-newsfeed-mcp      # view logs
-docker compose ps                # check status
+docker compose logs german-newsfeed-mcp
+docker compose ps
+```
+
+Or:
+
+```bash
+make docker-logs
 ```
 
 ### Step 4 — Connect Claude Desktop (Streamable HTTP)
 
 ```json
-{
-  "mcpServers": {
-    "tagesschau": {
+    "german-newsfeed": {
       "command": "npx",
       "args": ["mcp-remote", "http://localhost:8000/mcp"]
-    }
-  }
-}
+    },
 ```
 
-> **Remote server?** Replace `localhost` with your server's IP or domain. Make sure port 8000 is open in your firewall.
+For external servers: replace `localhost` with your server's IP or domain and open port 8000.
 
 ### Stop / Update
 
 ```bash
-docker compose down              # stop
-docker compose up --build -d     # rebuild after code changes
+docker compose down
+docker compose up --build -d
 ```
 
 ---
 
 ## Configuration Reference
 
-All settings are read from **environment variables** (or a `.env` file).
+All settings are read from environment variables (or a `.env` file).
 
-| Variable    | Default     | Description                                           |
-| ----------- | ----------- | ----------------------------------------------------- |
-| `TRANSPORT` | `stdio`     | Transport mode: `stdio` or `streamable_http`          |
-| `HOST`      | `127.0.0.1` | Bind address (use `0.0.0.0` in Docker)                |
-| `PORT`      | `8000`      | HTTP port (`streamable_http` only)                    |
-| `LOG_LEVEL` | `INFO`      | Python log level: `DEBUG`, `INFO`, `WARNING`, `ERROR` |
+| Variable              | Default   | Description                                                       |
+| --------------------- | --------- | ------------------------------------------------------------------ |
+| `TRANSPORT`           | `stdio`   | `stdio` or `streamable_http` (`sse` legacy)                        |
+| `HOST`                | `0.0.0.0` | Bind address (HTTP transports only)                                |
+| `PORT`                | `4200`    | HTTP port (HTTP transports only)                                   |
+| `LOG_LEVEL`           | `INFO`    | DEBUG, INFO, WARNING, ERROR                                        |
+| `RATE_LIMIT_PER_HOUR` | `60`      | Local request budget per hour towards the upstream API             |
+| `USER_AGENT_CONTACT`  | —         | Optional: contact info in the User-Agent header; omitted when unset |
 
 ---
 
@@ -238,7 +271,7 @@ These tools are callable by your AI assistant.
 
 ### `get_latest_news`
 
-Get the top stories from the Tagesschau homepage.
+Get the top stories.
 
 | Parameter | Type | Default | Description         |
 | --------- | ---- | ------- | ------------------- |
@@ -273,7 +306,7 @@ News from a specific German state.
 
 ### `search_news`
 
-Full-text search across all Tagesschau articles.
+Full-text search across all available articles.
 
 | Parameter     | Type | Default | Description               |
 | ------------- | ---- | ------- | ------------------------- |
@@ -283,21 +316,9 @@ Full-text search across all Tagesschau articles.
 
 ---
 
-### `get_news`
-
-Flexible fetcher — combine region and category.
-
-| Parameter | Type | Default | Description                |
-| --------- | ---- | ------- | -------------------------- |
-| `regions` | str  | None    | Region ID as string (1–16) |
-| `ressort` | str  | None    | Category filter            |
-| `limit`   | int  | 10      | Max items to return        |
-
----
-
 ### `get_channels`
 
-List all live Tagesschau channels with stream URLs.
+List all live channels with stream URLs.
 
 _(No parameters)_
 
@@ -324,24 +345,35 @@ Resources are addressable URIs that MCP clients can read directly.
 ```bash
 git clone https://github.com/Jakolo121/german-newsfeed-mcp.git
 cd german-newsfeed-mcp
-
-# Install with dev extras (pytest, pylint, etc.)
 uv sync --extra dev
+```
+
+Start the server:
+
+```bash
+uv run german-newsfeed-mcp
+```
+
+Or:
+
+```bash
+make run
 ```
 
 ### Code organisation (SOLID)
 
 Each module has exactly one responsibility:
 
-| Module          | Responsibility                                         |
-| --------------- | ------------------------------------------------------ |
-| `config.py`     | Read & expose env vars                                 |
-| `client.py`     | HTTP requests + error handling                         |
-| `validators.py` | Domain constants (`VALID_RESSORTS`) + input validation |
-| `formatters.py` | Turn raw API dicts into Markdown                       |
-| `tools.py`      | Validate inputs, call client, call formatter           |
-| `resources.py`  | Same as tools but for MCP resources                    |
-| `server.py`     | Assemble FastMCP, register handlers, start             |
+| Module            | Responsibility                                         |
+| ----------------- | ------------------------------------------------------ |
+| `config.py`       | Read & expose env vars                                 |
+| `client.py`       | HTTP requests + error handling                         |
+| `rate_limiter.py` | Local request budget (token bucket)                    |
+| `validators.py`   | Domain constants (`VALID_RESSORTS`) + input validation |
+| `formatters.py`   | Turn raw API dicts into Markdown                       |
+| `tools.py`        | Validate inputs, call client, call formatter           |
+| `resources.py`    | Same as tools but for MCP resources                    |
+| `server.py`       | Composition root: assemble FastMCP, register handlers, start |
 
 ### Adding a new tool
 
@@ -351,32 +383,20 @@ Each module has exactly one responsibility:
 
 ---
 
-## Makefile Reference
-
-```bash
-make test          # fast unit tests (no network, ~0.3 s)
-make test-all      # unit + live integration tests
-make lint          # pylint (enforced at 10.00/10)
-make check         # lint + unit tests — use as CI gate
-make run           # start server in stdio mode (Claude Desktop)
-make run-http      # start server in streamable_http mode
-make docker-build  # build Docker image
-make docker-run    # docker compose up -d
-make docker-stop   # docker compose down
-make docker-logs   # tail docker compose logs
-make clean         # remove __pycache__, .pytest_cache, dist, etc.
-```
-
----
-
 ## Running the Tests
 
 ### Unit tests (no internet required, fast)
 
 ```bash
-uv run pytest                          # run all unit tests
-uv run pytest -v                       # verbose output
+uv run pytest -m "not integration"     # run all unit tests
+uv run pytest -m "not integration" -v  # verbose output
 uv run pytest tests/test_formatters.py # single file
+```
+
+Or:
+
+```bash
+make test
 ```
 
 ### Live integration tests (requires internet)
@@ -389,14 +409,51 @@ uv run pytest -m integration -v        # verbose
 ### Full suite
 
 ```bash
-uv run pytest -m ""                    # unit + integration
+uv run pytest
+```
+
+Or:
+
+```bash
+make test-all
+```
+
+### Quality gate (lint + tests)
+
+```bash
+uv run pylint src/german_newsfeed_mcp/
+uv run pytest
+```
+
+Or:
+
+```bash
+make check
 ```
 
 ### Expected results
 
 ```
-124 passed in 0.28s   ← unit tests (no network)
- 23 selected          ← integration tests (live API)
+160 passed            ← unit tests (no network)
+ 21 selected          ← integration tests (live API)
+```
+
+---
+
+## Makefile Reference
+
+```bash
+make test          # fast unit tests (no network, ~0.3 s)
+make test-all      # unit + live integration tests
+make lint          # pylint
+make check         # lint + unit tests — use as CI gate
+make run           # start server in stdio mode (Claude Desktop)
+make run-http      # start server in streamable_http mode
+make docker-build  # build Docker image
+make docker-run    # docker compose up -d
+make docker-stop   # docker compose down
+make docker-logs   # tail docker compose logs
+make clean         # remove __pycache__, .pytest_cache, dist, etc.
 ```
 
 ---
@@ -415,11 +472,21 @@ uv run pytest -m ""                    # unit + integration
 docker compose logs german-newsfeed-mcp
 ```
 
+Or:
+
+```bash
+make docker-logs
+```
+
 Common causes: wrong `TRANSPORT` value (must be `streamable_http` in Docker), port already in use.
 
 ### API timeouts
 
-The Tagesschau API occasionally rate-limits certain filtered endpoints. This is normal — the server returns a descriptive error message rather than crashing. Retry after a few seconds.
+The upstream API occasionally rate-limits certain endpoints. This is normal — the server returns a descriptive error message rather than crashing. Retry after a few seconds.
+
+### Rate-limit errors
+
+If the server reports "Rate limit exceeded", the local request budget (`RATE_LIMIT_PER_HOUR`, default 60/h) is exhausted. No request was sent upstream. Try again later.
 
 ### Import errors in tests
 
@@ -430,7 +497,10 @@ uv run pytest           # always run via uv, not bare pytest
 
 ---
 
-## License
+## License & Acknowledgements
 
-This project is provided as-is under the MIT License.  
-News content belongs to ARD / Tagesschau — public broadcasting data, for personal / research use.
+Apache License 2.0.
+
+The delivered news items are content of the ARD broadcasters, subject to their rights and the terms of use of tagesschau.de — see [Data Source and Terms of Use](#data-source-and-terms-of-use).
+
+Thanks to **[AndreasFischer1985](https://github.com/AndreasFischer1985)** and the bund.dev community for documenting the API.

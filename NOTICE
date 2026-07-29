@@ -1,4 +1,4 @@
-ARD MCP Server
+German Newsfeed MCP Server
 Copyright 2026 Isabell Lorenzo-Reichardt
 
 This product is licensed under the Apache License, Version 2.0
@@ -25,8 +25,21 @@ httpx
 License: BSD 3-Clause License
 Homepage: https://www.python-httpx.org
 
-The Tagesschau/ARD news data accessed by this software is provided
-by ARD (Arbeitsgemeinschaft der öffentlich-rechtlichen Rundfunkanstalten
-der Bundesrepublik Deutschland) and subject to their terms of use:
+---
+
+This software retrieves data from the publicly accessible endpoint
+www.tagesschau.de/api2u/, operated by ARD-aktuell. The delivered news
+items are content of the ARD broadcasters (Inhalte der ARD-Anstalten),
+remain subject to their rights and to the terms of use of
+tagesschau.de:
 https://www.tagesschau.de/nutzungsbedingungen/
-Achtung: Die Nutzung der Inhalte für den privaten, nicht-kommerziellen Gebrauch ist gestattet, die Veröffentlichung hingegen nicht - mit Ausnahme von Angeboten, die explizit unter der CC-Lizenz stehen (https://tagesschau.de/creativecommons). Es ist unzulässig, mehr als 60 Abrufe pro Stunde zu tätigen.
+
+Applicable limits: at most 60 requests per hour, and no republication
+of the content except for offerings under a CC licence
+(https://tagesschau.de/creativecommons). Compliance is the
+responsibility of whoever operates a given instance.
+
+This is an unofficial project, not affiliated with, operated,
+endorsed, or approved by ARD, ARD-aktuell, or NDR. "ARD" and
+"tagesschau" are trademarks of their respective owners, referenced
+solely to describe the API.

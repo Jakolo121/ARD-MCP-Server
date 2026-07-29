@@ -1,10 +1,12 @@
-# ARD / Tagesschau MCP Server
+# German Newsfeed MCP Server
 
-> Verbinde deinen KI-Assistenten direkt mit aktuellen Nachrichten.  
-> Ein produktionsreifer [Model Context Protocol (MCP)](https://modelcontextprotocol.io)-Server, der die öffentliche Tagesschau-API nutzt.
+> **Disclaimer:** Dies ist ein inoffizielles Projekt. Es besteht keine Verbindung zu ARD, ARD-aktuell oder NDR; das Projekt wird von diesen weder betrieben noch unterstützt noch genehmigt. „ARD" und „tagesschau" sind Marken der jeweiligen Rechteinhaber und werden hier ausschließlich zur Beschreibung der angesprochenen Schnittstelle genannt.
 
-![pylint](https://img.shields.io/badge/pylint-10.00%2F10-brightgreen)
-![tests](https://img.shields.io/badge/tests-124%20passed-brightgreen)
+> MCP-Server für die öffentliche Nachrichten-API von tagesschau.de.  
+> Ein produktionsreifer [Model Context Protocol (MCP)](https://modelcontextprotocol.io)-Server, der deinen KI-Assistenten mit aktuellen Nachrichten verbindet.
+
+![pylint](https://img.shields.io/badge/pylint-9.97%2F10-brightgreen)
+![tests](https://img.shields.io/badge/tests-181%20passed-brightgreen)
 ![python](https://img.shields.io/badge/python-3.12%2B-blue)
 ![license](https://img.shields.io/badge/license-Apache%202.0-blue)
 
@@ -17,25 +19,26 @@ Sprache:
 
 ## Inhaltsverzeichnis
 
-1. [Was ist dieses Projekt?](#was-ist-dieses-Projekt)
-2. [Features](#features)
-3. [Projektstruktur](#projektstruktur)
-4. [Schnellstart Lokal (Claude Desktop)](#schnellstart--lokal-claude-desktop)
-5. [Remote / Docker-Deployment](#remote--docker-deployment)
-6. [Konfigurationsreferenz](#konfigurationsreferenz)
-7. [Verfügbare Tools](#verfügbare-tools)
-8. [Verfügbare Ressourcen](#verfügbare-ressourcen)
-9. [Entwicklung](#entwicklung)
-10. [Tests](#tests)
-11. [Makefile-Referenz](#makefile-referenz)
-12. [Fehlerbehebung](#fehlerbehebung)
-13. [Lizenz & Danksagung](#lizenz--danksagung)
+1. [Was ist dieses Projekt?](#was-ist-dieses-projekt)
+2. [Datenquelle und Nutzungsbedingungen](#datenquelle-und-nutzungsbedingungen)
+3. [Features](#features)
+4. [Projektstruktur](#projektstruktur)
+5. [Schnellstart Lokal (Claude Desktop)](#schnellstart-lokal-claude-desktop)
+6. [Remote / Docker-Deployment](#remote--docker-deployment)
+7. [Konfigurationsreferenz](#konfigurationsreferenz)
+8. [Verfügbare Tools](#verfügbare-tools)
+9. [Verfügbare Ressourcen](#verfügbare-ressourcen)
+10. [Entwicklung](#entwicklung)
+11. [Tests](#tests)
+12. [Makefile-Referenz](#makefile-referenz)
+13. [Fehlerbehebung](#fehlerbehebung)
+14. [Lizenz & Danksagung](#lizenz--danksagung)
 
 ---
 
 ## Was ist dieses Projekt?
 
-Dieser MCP-Server verbindet die ARD/Tagesschau-API mit deinem KI-Assistenten (Claude, Open Claw u.a.).
+Dieser MCP-Server verbindet die öffentliche Nachrichten-API von tagesschau.de mit deinem KI-Assistenten (Claude, Open Claw u.a.).
 
 Sobald verbunden, kann der Assistent z.B folgende Anfragen beantworten:
 
@@ -44,7 +47,30 @@ Sobald verbunden, kann der Assistent z.B folgende Anfragen beantworten:
 - _„Suche nach Artikeln über Ukraine."_
 - _„Welche Regionalnachrichten gibt es aus Bayern?"_
 
-Die API stammt von [Tagesschau](https://tagesschau.api.bund.dev).
+Details zur Schnittstelle und ihren Bedingungen: siehe [Datenquelle und Nutzungsbedingungen](#datenquelle-und-nutzungsbedingungen). Es wird kein API-Schlüssel benötigt.
+
+---
+
+## Datenquelle und Nutzungsbedingungen
+
+Dieser Server ruft die öffentlich erreichbare Schnittstelle
+`www.tagesschau.de/api2u/` auf. Betrieben wird sie von ARD-aktuell. Die
+ausgelieferten Inhalte stammen von den ARD-Anstalten, unterliegen deren
+Rechten und den Nutzungsbedingungen von tagesschau.de:
+https://www.tagesschau.de/nutzungsbedingungen/
+
+Die Schnittstelle ist nicht offiziell dokumentiert. Eine
+Community-Dokumentation liegt bei bund.dev vor
+(https://tagesschau.api.bund.dev). bund.dev ist ein
+zivilgesellschaftliches Dokumentationsprojekt, weder Betreiber der
+Schnittstelle noch Rechteinhaber an den Inhalten. Die Dokumentation war
+für dieses Projekt eine Orientierungshilfe, begründet aber keine
+Nutzungsrechte.
+
+Es gilt: maximal 60 Abrufe pro Stunde, keine Weiterveröffentlichung der
+Inhalte außer bei Angeboten unter CC-Lizenz
+(https://tagesschau.de/creativecommons). Die Einhaltung liegt beim
+Betreiber der jeweiligen Instanz.
 
 ---
 
@@ -54,10 +80,11 @@ Die API stammt von [Tagesschau](https://tagesschau.api.bund.dev).
 | -------------------- | --------------------------------------------------------- |
 | **Live-Nachrichten** | Aktuelle Meldungen, kategorisiert, regional, in Echtzeit  |
 | **Volltextsuche**    | Über alle verfügbaren Artikel                             |
-| **Livestreams**      | Alle Tagesschau-Kanäle mit HLS-URLs                       |
+| **Livestreams**      | Alle verfügbaren Kanäle mit HLS-URLs                      |
+| **Rate Limiter**     | Lokaler Token-Bucket, hält das 60/h-Limit der API ein     |
 | **Dual-Transport**   | `stdio` lokal; `streamable_http` für Remote und Docker    |
 | **Docker**           | Multi-Stage-Build, Nicht-Root-User, Health-Checks, Limits |
-| **124 Tests**        | Unit-Tests (< 0,3 s) + Live-Integrationstests             |
+| **181 Tests**        | 160 Unit-Tests + 21 Live-Integrationstests                |
 | **Makefile**         | `make test`, `make lint`, `make docker-build`             |
 | **Keine Secrets**    | Öffentliche API, kein API-Schlüssel nötig                 |
 
@@ -72,14 +99,16 @@ german-newsfeed-mcp/
 │       ├── __init__.py      # Paket-Metadaten
 │       ├── config.py        # Umgebungsvariablen
 │       ├── client.py        # Async HTTP (httpx) + Fehlerbehandlung
+│       ├── rate_limiter.py  # Token-Bucket-Rate-Limiter
 │       ├── validators.py    # Validierung
 │       ├── formatters.py    # Markdown-Output
 │       ├── tools.py         # MCP-Tool-Logik
 │       ├── resources.py     # MCP-Ressourcen-Logik
-│       └── server.py        # FastMCP + run()
+│       └── server.py        # Composition Root: FastMCP + run()
 ├── tests/
 │   ├── conftest.py          # Fixtures, Mock-Daten
 │   ├── test_client.py       # Client-Tests
+│   ├── test_rate_limiter.py # Rate-Limiter-Tests
 │   ├── test_formatters.py   # Formatter-Tests
 │   ├── test_tools.py        # Tool-Tests
 │   └── test_resources.py    # Ressourcen-Tests
@@ -97,9 +126,9 @@ german-newsfeed-mcp/
 
 ---
 
-## Schnellstart Lokal (Bsp. Claude Desktop - gilt aber auch für andere KI-Assistenten)
+## Schnellstart Lokal (Claude Desktop)
 
-Der `stdio`-Transport startet den Server als Subprocess. Es muss kein Port angegeben werden.
+Gilt genauso für andere KI-Assistenten — dort die entsprechende Konfiguration bearbeiten. Der `stdio`-Transport startet den Server als Subprocess. Es muss kein Port angegeben werden.
 
 ### Voraussetzungen
 
@@ -120,12 +149,10 @@ uv sync
 
 ```bash
 uv run python -c "from german_newsfeed_mcp.server import mcp; print('OK!', mcp.name)"
-# Erwartete Ausgabe: OK! Tagesschau News API
+# Erwartete Ausgabe: OK! German Newsfeed MCP
 ```
 
-### Schritt 3: Claude Desktop oder andern Aissistenten konfigurieren
-
-**Wir nehmen hier Claude Desktop als Beispiel, bei anderen Assistenten die entsprechende Konfig bearbeiten**
+### Schritt 3: Claude Desktop oder anderen Assistenten konfigurieren
 
 Öffne die Claude-Konfigurationsdatei:
 
@@ -138,7 +165,7 @@ uv run python -c "from german_newsfeed_mcp.server import mcp; print('OK!', mcp.n
 Eintrag hinzufügen (Pfad anpassen):
 
 ```json
-    "tagesschau": {
+    "german-newsfeed": {
       "command": "uv",
       "args": [
         "--directory",
@@ -157,7 +184,7 @@ Die Application neustarten oder die MCP-Server neu laden, je nach Application
 
 Frage KI-Assistenten:
 
-> _„Was sind die aktuellen Tagesschau-Nachrichten?"_
+> _„Was sind die aktuellen Nachrichten?"_
 
 ---
 
@@ -208,7 +235,7 @@ make docker-logs
 ### Schritt 4: Claude Desktop anpassen (Streamable HTTP)
 
 ```json
-    "tagesschau": {
+    "german-newsfeed": {
       "command": "npx",
       "args": ["mcp-remote", "http://localhost:8000/mcp"]
     },
@@ -229,11 +256,14 @@ docker compose up --build -d
 
 Alle Einstellungen kommen aus Umgebungsvariablen oder `.env`.
 
-| Variable    | Standard | Beschreibung                      |
-| ----------- | -------- | --------------------------------- |
-| `TRANSPORT` | `stdio`  | `stdio` oder `streamable_http`    |
-| `PORT`      | `8000`   | HTTP-Port (nur `streamable_http`) |
-| `LOG_LEVEL` | `INFO`   | DEBUG, INFO, WARNING, ERROR       |
+| Variable              | Standard  | Beschreibung                                                        |
+| --------------------- | --------- | ------------------------------------------------------------------- |
+| `TRANSPORT`           | `stdio`   | `stdio` oder `streamable_http` (`sse` legacy)                       |
+| `HOST`                | `0.0.0.0` | Bind-Adresse (nur HTTP-Transporte)                                  |
+| `PORT`                | `4200`    | HTTP-Port (nur HTTP-Transporte)                                     |
+| `LOG_LEVEL`           | `INFO`    | DEBUG, INFO, WARNING, ERROR                                         |
+| `RATE_LIMIT_PER_HOUR` | `60`      | Lokales Anfragelimit pro Stunde gegenüber der Upstream-API          |
+| `USER_AGENT_CONTACT`  | —         | Optional: Kontaktangabe im User-Agent-Header; entfällt, wenn nicht gesetzt |
 
 ---
 
@@ -288,18 +318,6 @@ Volltextsuche.
 
 ---
 
-### `get_news`
-
-Kombinierte Abfrage — Region + Kategorie.
-
-| Parameter | Typ | Standard | Beschreibung        |
-| --------- | --- | -------- | ------------------- |
-| `regions` | str | None     | Region-ID (1–16)    |
-| `ressort` | str | None     | Kategorie-Filter    |
-| `limit`   | int | 10       | Maximale Ergebnisse |
-
----
-
 ### `get_channels`
 
 Live-Kanäle mit Stream-URLs.
@@ -348,15 +366,16 @@ make run
 
 Jedes Modul hat eine Aufgabe:
 
-| Modul           | Aufgabe                                        |
-| --------------- | ---------------------------------------------- |
-| `config.py`     | Umgebungsvariablen lesen                       |
-| `client.py`     | HTTP + Fehlerbehandlung                        |
-| `validators.py` | Eingabevalidierung                             |
-| `formatters.py` | API-Dicts zu Markdown                          |
-| `tools.py`      | Tool-Logik (validieren, aufrufen, formatieren) |
-| `resources.py`  | Ressourcen-Logik                               |
-| `server.py`     | FastMCP, Handler, Startup                      |
+| Modul             | Aufgabe                                        |
+| ----------------- | ---------------------------------------------- |
+| `config.py`       | Umgebungsvariablen lesen                       |
+| `client.py`       | HTTP + Fehlerbehandlung                        |
+| `rate_limiter.py` | Lokales Anfragelimit (Token-Bucket)            |
+| `validators.py`   | Eingabevalidierung                             |
+| `formatters.py`   | API-Dicts zu Markdown                          |
+| `tools.py`        | Tool-Logik (validieren, aufrufen, formatieren) |
+| `resources.py`    | Ressourcen-Logik                               |
+| `server.py`       | Composition Root, FastMCP, Handler, Startup    |
 
 ### Neues Tool
 
@@ -371,8 +390,8 @@ Jedes Modul hat eine Aufgabe:
 ### Unit-Tests (schnell, kein Netz)
 
 ```bash
-uv run pytest
-uv run pytest -v
+uv run pytest -m "not integration"
+uv run pytest -m "not integration" -v
 uv run pytest tests/test_formatters.py
 ```
 
@@ -392,7 +411,7 @@ uv run pytest -m integration -v
 ### Alle Tests
 
 ```bash
-uv run pytest -m ""
+uv run pytest
 ```
 
 Oder:
@@ -417,8 +436,8 @@ make check
 ### Erwartete Ergebnisse
 
 ```
-124 passed in X s   ← Unit-Tests
- 23 selected          ← Integrationstests
+160 passed            ← Unit-Tests
+ 21 selected          ← Integrationstests
 ```
 
 ---
@@ -465,7 +484,11 @@ Häufig: falscher `TRANSPORT` (in Docker muss es `streamable_http` sein), oder P
 
 ### API-Timeouts
 
-Die Tagesschau-API limitiert manchmal. Das ist normal, der Server meldet einen Fehler, statt abzustürzen. Später nochmal versuchen.
+Die Upstream-API limitiert manchmal. Das ist normal, der Server meldet einen Fehler, statt abzustürzen. Später nochmal versuchen.
+
+### Rate-Limit-Fehler
+
+Meldet der Server „Rate limit exceeded", ist das lokale Anfragebudget (`RATE_LIMIT_PER_HOUR`, Standard 60/h) aufgebraucht. Es wurde kein Request an die API gesendet. Später erneut versuchen.
 
 ### Import-Fehler bei Tests
 
@@ -482,6 +505,6 @@ uv run pytest
 
 Apache License 2.0.
 
-Nachrichteninhalte: ARD / Tagesschau öffentliche Rundfunkdaten, persönliche Nutzung und Forschung.
+Die ausgelieferten Nachrichten sind Inhalte der ARD-Anstalten, unterliegen deren Rechten und den Nutzungsbedingungen von tagesschau.de — siehe [Datenquelle und Nutzungsbedingungen](#datenquelle-und-nutzungsbedingungen).
 
-Danke an **[AndreasFischer1985](https://github.com/AndreasFischer1985)** für die [Tagesschau-API](https://tagesschau.api.bund.dev).
+Danke an **[AndreasFischer1985](https://github.com/AndreasFischer1985)** und die bund.dev-Community für die Dokumentation der Schnittstelle.
