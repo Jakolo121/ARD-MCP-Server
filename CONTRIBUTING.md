@@ -21,8 +21,8 @@ This project uses [uv](https://docs.astral.sh/uv/) as its package manager.
 
 ```bash
 # 1. Clone the repo
-git clone https://github.com/Jakolo121/ard_mcp_server.git
-cd ard_mcp_server
+git clone https://github.com/Jakolo121/german-newsfeed-mcp.git
+cd german-newsfeed-mcp
 
 # 2. Install all dependencies (including dev extras)
 uv sync --extra dev
@@ -74,7 +74,7 @@ The project enforces **pylint 10.00/10**. Pull requests that lower the score wil
 ## Project Structure
 
 ```
-src/ard_mcp/
+src/german_newsfeed_mcp/
 ├── __init__.py      # Package metadata (__version__, __author__)
 ├── config.py        # Environment-variable-driven configuration
 ├── client.py        # httpx async HTTP client for the Tagesschau API

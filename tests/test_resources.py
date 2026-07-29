@@ -1,5 +1,5 @@
 """
-Tests for ard_mcp.resources — MCP resource business logic.
+Tests for german_newsfeed_mcp.resources — MCP resource business logic.
 
 Section A: Unit tests with mocked fetch_from_api / get_news.
 Section B: Integration tests against the real Tagesschau API.
@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from ard_mcp.resources import (
+from german_newsfeed_mcp.resources import (
     resource_channels,
     resource_homepage,
     resource_news_by_ressort,
@@ -21,8 +21,8 @@ from ard_mcp.resources import (
 # ---------------------------------------------------------------------------
 # Patch helpers
 # ---------------------------------------------------------------------------
-FETCH_PATH = "ard_mcp.resources.fetch_from_api"
-GET_NEWS_PATH = "ard_mcp.resources.get_news"
+FETCH_PATH = "german_newsfeed_mcp.resources.fetch_from_api"
+GET_NEWS_PATH = "german_newsfeed_mcp.resources.get_news"
 
 
 # ===========================================================================

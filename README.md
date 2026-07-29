@@ -66,9 +66,9 @@ Die API stammt von [Tagesschau](https://tagesschau.api.bund.dev).
 ## Projektstruktur
 
 ```
-ARD_MCP/
+german-newsfeed-mcp/
 ├── src/
-│   └── ard_mcp/
+│   └── german_newsfeed_mcp/
 │       ├── __init__.py      # Paket-Metadaten
 │       ├── config.py        # Umgebungsvariablen
 │       ├── client.py        # Async HTTP (httpx) + Fehlerbehandlung
@@ -111,15 +111,15 @@ Der `stdio`-Transport startet den Server als Subprocess. Es muss kein Port angeg
 ### Schritt 1: Repository klonen und Projekt installieren
 
 ```bash
-git clone https://github.com/Jakolo121/ard_mcp_server.git
-cd ard_mcp_server
+git clone https://github.com/Jakolo121/german-newsfeed-mcp.git
+cd german-newsfeed-mcp
 uv sync
 ```
 
 ### Schritt 2: Funktionscheck
 
 ```bash
-uv run python -c "from ard_mcp.server import mcp; print('OK!', mcp.name)"
+uv run python -c "from german_newsfeed_mcp.server import mcp; print('OK!', mcp.name)"
 # Erwartete Ausgabe: OK! Tagesschau News API
 ```
 
@@ -142,9 +142,9 @@ Eintrag hinzufügen (Pfad anpassen):
       "command": "uv",
       "args": [
         "--directory",
-        "/absoluter/pfad/zu/ard_mcp_server",
+        "/absoluter/pfad/zu/german-newsfeed-mcp",
         "run",
-        "ard-mcp"
+        "german-newsfeed-mcp"
       ]
     },
 ```
@@ -195,7 +195,7 @@ Der Server läuft auf `http://localhost:8000`.
 ### Schritt 3: Status prüfen
 
 ```bash
-docker compose logs ard-mcp
+docker compose logs german-newsfeed-mcp
 docker compose ps
 ```
 
@@ -327,15 +327,15 @@ URIs, die MCP-Clients lesen können.
 ### Setup
 
 ```bash
-git clone https://github.com/Jakolo121/ard_mcp_server.git
-cd ard_mcp_server
+git clone https://github.com/Jakolo121/german-newsfeed-mcp.git
+cd german-newsfeed-mcp
 uv sync --extra dev
 ```
 
 Server starten:
 
 ```bash
-uv run ard-mcp
+uv run german-newsfeed-mcp
 ```
 
 Oder:
@@ -404,7 +404,7 @@ make test-all
 ### Qualität checken (Lint + Tests)
 
 ```bash
-uv run pylint src/ard_mcp/
+uv run pylint src/german_newsfeed_mcp/
 uv run pytest
 ```
 
@@ -452,7 +452,7 @@ make clean         # __pycache__ etc. löschen
 ### Docker-Container beendet sich sofort
 
 ```bash
-docker compose logs ard-mcp
+docker compose logs german-newsfeed-mcp
 ```
 
 Oder:

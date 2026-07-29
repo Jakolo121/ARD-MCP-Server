@@ -14,7 +14,7 @@ from typing import Any, Dict, Optional
 
 import httpx
 
-from ard_mcp import config
+from german_newsfeed_mcp import config
 
 logger = logging.getLogger(__name__)
 
@@ -48,7 +48,7 @@ async def fetch_from_api(
     logger.debug("GET %s params=%s", url, params)
 
     try:
-        async with httpx.AsyncClient(headers={"User-Agent": "ARD_MCP_Server"}) as client:
+        async with httpx.AsyncClient(headers={"User-Agent": "german-newsfeed-mcp"}) as client:
             logger.debug("User-Agent: %s", client.headers.get("user-agent"))
             response = await client.get(url, params=params, timeout=config.API_TIMEOUT)
             response.raise_for_status()

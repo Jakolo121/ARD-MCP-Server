@@ -65,9 +65,9 @@ All data comes from the official, public [Tagesschau API](https://www.tagesschau
 ## Project Structure
 
 ```
-ARD_MCP/
+german-newsfeed-mcp/
 ├── src/
-│   └── ard_mcp/
+│   └── german_newsfeed_mcp/
 │       ├── __init__.py      # Package metadata (__version__, __author__)
 │       ├── config.py        # Environment-driven configuration
 │       ├── client.py        # Async HTTP client (httpx) + error handling
@@ -110,8 +110,8 @@ This mode uses `stdio` transport — the server is launched as a child process b
 ### Step 1 — Clone and install
 
 ```bash
-git clone https://github.com/Jakolo121/ard_mcp_server.git
-cd ard_mcp_server
+git clone https://github.com/Jakolo121/german-newsfeed-mcp.git
+cd german-newsfeed-mcp
 
 # Install all dependencies (uv creates .venv automatically)
 uv sync
@@ -120,7 +120,7 @@ uv sync
 ### Step 2 — Verify it works
 
 ```bash
-uv run python -c "from ard_mcp.server import mcp; print('OK —', mcp.name)"
+uv run python -c "from german_newsfeed_mcp.server import mcp; print('OK —', mcp.name)"
 # Expected: OK — Tagesschau News API
 ```
 
@@ -143,9 +143,9 @@ Add the following entry (adjust the path to your clone):
       "command": "uv",
       "args": [
         "--directory",
-        "/absolute/path/to/ard_mcp_server",
+        "/absolute/path/to/german-newsfeed-mcp",
         "run",
-        "ard-mcp"
+        "german-newsfeed-mcp"
       ]
     }
   }
@@ -191,7 +191,7 @@ The server starts at `http://localhost:8000`.
 ### Step 3 — Verify health
 
 ```bash
-docker compose logs ard-mcp      # view logs
+docker compose logs german-newsfeed-mcp      # view logs
 docker compose ps                # check status
 ```
 
@@ -322,8 +322,8 @@ Resources are addressable URIs that MCP clients can read directly.
 ### Setup
 
 ```bash
-git clone https://github.com/Jakolo121/ard_mcp_server.git
-cd ard_mcp_server
+git clone https://github.com/Jakolo121/german-newsfeed-mcp.git
+cd german-newsfeed-mcp
 
 # Install with dev extras (pytest, pylint, etc.)
 uv sync --extra dev
@@ -412,7 +412,7 @@ uv run pytest -m ""                    # unit + integration
 ### Docker container exits immediately
 
 ```bash
-docker compose logs ard-mcp
+docker compose logs german-newsfeed-mcp
 ```
 
 Common causes: wrong `TRANSPORT` value (must be `streamable_http` in Docker), port already in use.

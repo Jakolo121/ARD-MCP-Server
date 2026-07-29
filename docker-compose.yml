@@ -12,12 +12,12 @@
 # =============================================================================
 
 services:
-  ard-mcp:
+  german-newsfeed-mcp:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ard-mcp:latest
-    container_name: ard-mcp
+    image: german-newsfeed-mcp:latest
+    container_name: german-newsfeed-mcp
 
     # Load overrides from .env (copy .env.example → .env first)
     env_file:

@@ -27,21 +27,21 @@ test-all:
 	uv run pytest tests/ -q
 
 lint:
-	uv run pylint src/ard_mcp/
+	uv run pylint src/german_newsfeed_mcp/
 
 check: lint test
 
 run:
-	uv run ard-mcp
+	uv run german-newsfeed-mcp
 
 run-http:
-	MCP_TRANSPORT=streamable_http uv run ard-mcp
+	MCP_TRANSPORT=streamable_http uv run german-newsfeed-mcp
 
 # ---------------------------------------------------------------------------
 # Docker
 # ---------------------------------------------------------------------------
 
-IMAGE_NAME ?= ard-mcp
+IMAGE_NAME ?= german-newsfeed-mcp
 IMAGE_TAG  ?= latest
 
 docker-build:
@@ -54,7 +54,7 @@ docker-stop:
 	docker compose down
 
 docker-logs:
-	docker compose logs -f ard-mcp
+	docker compose logs -f german-newsfeed-mcp
 
 # ---------------------------------------------------------------------------
 # Cleanup

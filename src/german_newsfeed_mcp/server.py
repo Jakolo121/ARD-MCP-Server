@@ -13,15 +13,15 @@ from typing import Optional
 
 from fastmcp import FastMCP
 
-from ard_mcp import config
-from ard_mcp.resources import (
+from german_newsfeed_mcp import config
+from german_newsfeed_mcp.resources import (
     resource_channels,
     resource_homepage,
     resource_news_by_ressort,
     resource_regional_news,
     resource_search,
 )
-from ard_mcp.tools import (
+from german_newsfeed_mcp.tools import (
     tool_get_channels,
     tool_get_latest_news,
     tool_get_news_by_ressort,
@@ -44,7 +44,7 @@ logger = logging.getLogger(__name__)
 # FastMCP instance
 # ---------------------------------------------------------------------------
 mcp = FastMCP(
-    name="Tagesschau News API",
+    name="German Newsfeed MCP",
 )
 
 # ---------------------------------------------------------------------------

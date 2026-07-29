@@ -6,10 +6,10 @@
 #   runtime  – copies only the venv + source, runs as non-root user
 #
 # Build:
-#   docker build -t ard-mcp .
+#   docker build -t german-newsfeed-mcp .
 #
 # Run (Streamable HTTP / remote):
-#   docker run -p 8000:8000 -e TRANSPORT=streamable_http ard-mcp
+#   docker run -p 8000:8000 -e TRANSPORT=streamable_http german-newsfeed-mcp
 # =============================================================================
 
 # ── Stage 1: builder ──────────────────────────────────────────────────────────

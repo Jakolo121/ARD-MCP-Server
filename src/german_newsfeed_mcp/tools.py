@@ -10,11 +10,11 @@ needing a running FastMCP instance.
 import logging
 from typing import Optional
 
-from ard_mcp.client import ENDPOINTS, fetch_from_api, get_news
-from ard_mcp.formatters import _format_streams, format_channels, format_news_list
-from ard_mcp.validators import VALID_REGION_IDS, VALID_RESSORTS, normalise_ressort, validate_ressort
+from german_newsfeed_mcp.client import ENDPOINTS, fetch_from_api, get_news
+from german_newsfeed_mcp.formatters import _format_streams, format_channels, format_news_list
+from german_newsfeed_mcp.validators import VALID_REGION_IDS, VALID_RESSORTS, normalise_ressort, validate_ressort
 
-# VALID_RESSORTS is re-exported so tests can import it from ard_mcp.tools
+# VALID_RESSORTS is re-exported so tests can import it from german_newsfeed_mcp.tools
 __all__ = ["VALID_RESSORTS", "VALID_REGION_IDS", "validate_ressort"]
 
 logger = logging.getLogger(__name__)

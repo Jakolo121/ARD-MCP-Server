@@ -1,5 +1,5 @@
 """
-Tests for ard_mcp.client — HTTP client layer.
+Tests for german_newsfeed_mcp.client — HTTP client layer.
 
 Section A: Unit tests using unittest.mock (no network I/O).
 Section B: Integration tests against the real Tagesschau API.
@@ -14,7 +14,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import httpx
 import pytest
 
-from ard_mcp.client import ENDPOINTS, fetch_from_api, get_news
+from german_newsfeed_mcp.client import ENDPOINTS, fetch_from_api, get_news
 
 
 # ===========================================================================
@@ -37,7 +37,7 @@ class TestFetchFromApiMock:
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock(return_value=False)
 
-        with patch("ard_mcp.client.httpx.AsyncClient", return_value=mock_client):
+        with patch("german_newsfeed_mcp.client.httpx.AsyncClient", return_value=mock_client):
             result = await fetch_from_api(ENDPOINTS["news"])
 
         assert "news" in result
@@ -57,7 +57,7 @@ class TestFetchFromApiMock:
             )
         )
 
-        with patch("ard_mcp.client.httpx.AsyncClient", return_value=mock_client):
+        with patch("german_newsfeed_mcp.client.httpx.AsyncClient", return_value=mock_client):
             result = await fetch_from_api(ENDPOINTS["news"])
 
         assert "error" in result
@@ -72,7 +72,7 @@ class TestFetchFromApiMock:
             side_effect=httpx.TimeoutException("timed out")
         )
 
-        with patch("ard_mcp.client.httpx.AsyncClient", return_value=mock_client):
+        with patch("german_newsfeed_mcp.client.httpx.AsyncClient", return_value=mock_client):
             result = await fetch_from_api(ENDPOINTS["news"])
 
         assert result["error"] == "Timeout"
@@ -86,7 +86,7 @@ class TestFetchFromApiMock:
             side_effect=httpx.RequestError("connection refused")
         )
 
-        with patch("ard_mcp.client.httpx.AsyncClient", return_value=mock_client):
+        with patch("german_newsfeed_mcp.client.httpx.AsyncClient", return_value=mock_client):
             result = await fetch_from_api(ENDPOINTS["news"])
 
         assert result["error"] == "Request error"
@@ -104,7 +104,7 @@ class TestFetchFromApiMock:
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock(return_value=False)
 
-        with patch("ard_mcp.client.httpx.AsyncClient", return_value=mock_client):
+        with patch("german_newsfeed_mcp.client.httpx.AsyncClient", return_value=mock_client):
             result = await fetch_from_api(ENDPOINTS["news"])
 
         assert result["error"] == "Invalid JSON response"
@@ -116,7 +116,7 @@ class TestFetchFromApiMock:
         mock_client.__aexit__ = AsyncMock(return_value=False)
         mock_client.get = AsyncMock(side_effect=RuntimeError("unexpected!"))
 
-        with patch("ard_mcp.client.httpx.AsyncClient", return_value=mock_client):
+        with patch("german_newsfeed_mcp.client.httpx.AsyncClient", return_value=mock_client):
             result = await fetch_from_api(ENDPOINTS["news"])
 
         assert result["error"] == "Unknown error"
@@ -133,7 +133,7 @@ class TestFetchFromApiMock:
         mock_client.__aenter__ = AsyncMock(return_value=mock_client)
         mock_client.__aexit__ = AsyncMock(return_value=False)
 
-        with patch("ard_mcp.client.httpx.AsyncClient", return_value=mock_client):
+        with patch("german_newsfeed_mcp.client.httpx.AsyncClient", return_value=mock_client):
             await fetch_from_api(ENDPOINTS["news"], {"ressort": "inland"})
 
         call_kwargs = mock_client.get.call_args
@@ -146,7 +146,7 @@ class TestGetNewsMock:
     async def test_returns_news_key_by_default(self):
         """Without filters, get_news must return items from the 'news' key."""
         payload = {"news": [{"title": "Foo"}], "regional": [{"title": "Bar"}]}
-        with patch("ard_mcp.client.fetch_from_api", AsyncMock(return_value=payload)):
+        with patch("german_newsfeed_mcp.client.fetch_from_api", AsyncMock(return_value=payload)):
             result = await get_news()
         assert result["items"] == [{"title": "Foo"}]
 
@@ -155,7 +155,7 @@ class TestGetNewsMock:
         # The Tagesschau API always returns region-filtered results under the
         # "news" key; the "regional" key is always empty for this endpoint.
         payload = {"news": [{"title": "Bayern News"}], "regional": []}
-        with patch("ard_mcp.client.fetch_from_api", AsyncMock(return_value=payload)):
+        with patch("german_newsfeed_mcp.client.fetch_from_api", AsyncMock(return_value=payload)):
             result = await get_news(params={"regions": "2"})
         assert result["items"] == [{"title": "Bayern News"}]
 
@@ -163,14 +163,14 @@ class TestGetNewsMock:
         """The limit parameter must slice the returned items list."""
         items = [{"title": f"Item {i}"} for i in range(20)]
         payload = {"news": items, "regional": []}
-        with patch("ard_mcp.client.fetch_from_api", AsyncMock(return_value=payload)):
+        with patch("german_newsfeed_mcp.client.fetch_from_api", AsyncMock(return_value=payload)):
             result = await get_news(limit=5)
         assert len(result["items"]) == 5
 
     async def test_propagates_error_response(self, error_response):
         """An error response from the API must be forwarded unchanged."""
         with patch(
-            "ard_mcp.client.fetch_from_api", AsyncMock(
+            "german_newsfeed_mcp.client.fetch_from_api", AsyncMock(
                 return_value=error_response)
         ):
             result = await get_news()

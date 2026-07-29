@@ -38,34 +38,6 @@ wheels = [
 ]
 
 [[package]]
-name = "ard-mcp"
-version = "1.0.0"
-source = { editable = "." }
-dependencies = [
-    { name = "fastmcp" },
-    { name = "httpx" },
-]
-
-[package.optional-dependencies]
-dev = [
-    { name = "anyio" },
-    { name = "pylint" },
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "anyio", marker = "extra == 'dev'", specifier = ">=4.0" },
-    { name = "fastmcp", specifier = ">=2.3.0" },
-    { name = "httpx", specifier = ">=0.27" },
-    { name = "pylint", marker = "extra == 'dev'", specifier = ">=3.0" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
-    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.24" },
-]
-provides-extras = ["dev"]
-
-[[package]]
 name = "astroid"
 version = "4.0.4"
 source = { registry = "https://pypi.org/simple" }
@@ -379,6 +351,34 @@ sdist = { url = "https://files.pythonhosted.org/packages/9c/13/29544fbc6dfe45ea3
 wheels = [
     { url = "https://files.pythonhosted.org/packages/cf/76/b310d52fa0e30d39bd937eb58ec2c1f1ea1b5f519f0575e9dd9612f01deb/fastmcp-3.2.4-py3-none-any.whl", hash = "sha256:e6c9c429171041455e47ab94bb3f83c4657622a0ec28922f6940053959bd58a9", size = 728599, upload-time = "2026-04-14T01:42:26.85Z" },
 ]
+
+[[package]]
+name = "german-newsfeed-mcp"
+version = "1.0.0"
+source = { editable = "." }
+dependencies = [
+    { name = "fastmcp" },
+    { name = "httpx" },
+]
+
+[package.optional-dependencies]
+dev = [
+    { name = "anyio" },
+    { name = "pylint" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "anyio", marker = "extra == 'dev'", specifier = ">=4.0" },
+    { name = "fastmcp", specifier = ">=2.3.0" },
+    { name = "httpx", specifier = ">=0.27" },
+    { name = "pylint", marker = "extra == 'dev'", specifier = ">=3.0" },
+    { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.0" },
+    { name = "pytest-asyncio", marker = "extra == 'dev'", specifier = ">=0.24" },
+]
+provides-extras = ["dev"]
 
 [[package]]
 name = "griffelib"

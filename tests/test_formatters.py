@@ -1,10 +1,10 @@
 """
-Unit tests for ard_mcp.formatters.
+Unit tests for german_newsfeed_mcp.formatters.
 
 Pure functions — no I/O, no mocking required.
 """
 
-from ard_mcp.formatters import format_channels, format_news_item, format_news_list
+from german_newsfeed_mcp.formatters import format_channels, format_news_item, format_news_list
 
 
 # ---------------------------------------------------------------------------

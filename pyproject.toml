@@ -1,14 +1,14 @@
 [project]
-name = "ard-mcp"
+name = "german-newsfeed-mcp"
 version = "1.0.0"
-description = "A MCP Server that brings the latest ARD/Tagesschau news into your AI chat application."
+description = "MCP server for the public news API of tagesschau.de, including regional news from the ARD Landesrundfunkanstalten"
 readme = "README.md"
 license = { text = "Apache-2.0" }
 authors = [
     { name = "Isabell Lorenzo-Reichardt", email = "Bereichardt@gmail.com" }
 ]
 requires-python = ">=3.12"
-keywords = ["mcp", "ard", "tagesschau", "news", "llm", "AI-Assistent"]
+keywords = ["mcp", "mcp-server", "news", "tagesschau", "german-news", "llm"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
@@ -25,13 +25,13 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage    = "https://github.com/Jakolo121/ard_mcp_server"
-Repository  = "https://github.com/Jakolo121/ard_mcp_server"
-Issues      = "https://github.com/Jakolo121/ard_mcp_server/issues"
-Changelog   = "https://github.com/Jakolo121/ard_mcp_server/blob/main/CHANGELOG.md"
+Homepage    = "https://github.com/Jakolo121/german-newsfeed-mcp"
+Repository  = "https://github.com/Jakolo121/german-newsfeed-mcp"
+Issues      = "https://github.com/Jakolo121/german-newsfeed-mcp/issues"
+Changelog   = "https://github.com/Jakolo121/german-newsfeed-mcp/blob/main/CHANGELOG.md"
 
 [project.scripts]
-ard-mcp = "ard_mcp.server:run"
+german-newsfeed-mcp = "german_newsfeed_mcp.server:run"
 
 [project.optional-dependencies]
 dev = [
@@ -48,7 +48,7 @@ build-backend = "uv_build"
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 testpaths = ["tests"]
-# Put src/ on sys.path so tests can import ard_mcp without installing
+# Put src/ on sys.path so tests can import german_newsfeed_mcp without installing
 pythonpath = ["src"]
 # Show locals on failure, verbose output
 addopts = "-v --tb=short"
