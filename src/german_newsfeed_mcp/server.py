@@ -179,7 +179,7 @@ def run() -> None:
     Supported transports:
         stdio           – local Claude Desktop / CLI usage (default)
         sse             – Server-Sent Events for remote / Docker deployments
-        streamable_http – Streamable HTTP, stateless, endpoint: /mcp
+        streamable-http – Streamable HTTP, stateless, endpoint: /mcp
     """
     logger.info(
         "Starting Tagesschau MCP server — transport=%s host=%s port=%d",
@@ -192,5 +192,5 @@ def run() -> None:
         mcp.run(transport="stdio")
     elif config.TRANSPORT == "sse":
         mcp.run(transport="sse", host=config.HOST, port=config.PORT)
-    else:  # streamable_http
+    else:  # streamable-http
         mcp.run(transport="http", host=config.HOST, port=config.PORT, stateless_http=True)

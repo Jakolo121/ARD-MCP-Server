@@ -82,7 +82,7 @@ Betreiber der jeweiligen Instanz.
 | **Volltextsuche**    | Über alle verfügbaren Artikel                             |
 | **Livestreams**      | Alle verfügbaren Kanäle mit HLS-URLs                      |
 | **Rate Limiter**     | Lokaler Token-Bucket, hält das 60/h-Limit der API ein     |
-| **Dual-Transport**   | `stdio` lokal; `streamable_http` für Remote und Docker    |
+| **Dual-Transport**   | `stdio` lokal; `streamable-http` für Remote und Docker    |
 | **Docker**           | Multi-Stage-Build, Nicht-Root-User, Health-Checks, Limits |
 | **181 Tests**        | 160 Unit-Tests + 21 Live-Integrationstests                |
 | **Makefile**         | `make test`, `make lint`, `make docker-build`             |
@@ -190,7 +190,7 @@ Frage KI-Assistenten:
 
 ## Remote / Docker-Deployment
 
-Der `streamable_http`-Transport nutzt HTTP. Geeignet für Server, Cloud-VMs oder Multi-Client-Setup. Stateless! Legacy sse wird noch supportet!
+Der `streamable-http`-Transport nutzt HTTP. Geeignet für Server, Cloud-VMs oder Multi-Client-Setup. Stateless! Legacy sse wird noch supportet!
 
 ### Voraussetzungen
 
@@ -258,7 +258,7 @@ Alle Einstellungen kommen aus Umgebungsvariablen oder `.env`.
 
 | Variable              | Standard  | Beschreibung                                                        |
 | --------------------- | --------- | ------------------------------------------------------------------- |
-| `TRANSPORT`           | `stdio`   | `stdio` oder `streamable_http` (`sse` legacy)                       |
+| `TRANSPORT`           | `stdio`   | `stdio` oder `streamable-http` (`sse` legacy)                       |
 | `HOST`                | `0.0.0.0` | Bind-Adresse (nur HTTP-Transporte)                                  |
 | `PORT`                | `4200`    | HTTP-Port (nur HTTP-Transporte)                                     |
 | `LOG_LEVEL`           | `INFO`    | DEBUG, INFO, WARNING, ERROR                                         |
@@ -480,7 +480,7 @@ Oder:
 make docker-logs
 ```
 
-Häufig: falscher `TRANSPORT` (in Docker muss es `streamable_http` sein), oder Port belegt.
+Häufig: falscher `TRANSPORT` (in Docker muss es `streamable-http` sein), oder Port belegt.
 
 ### API-Timeouts
 

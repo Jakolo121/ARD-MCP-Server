@@ -24,7 +24,7 @@ services:
       - .env
 
     environment:
-      TRANSPORT: streamable_http
+      TRANSPORT: streamable-http
       HOST: 0.0.0.0
       PORT: "8000"
       LOG_LEVEL: INFO

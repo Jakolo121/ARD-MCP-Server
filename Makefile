@@ -7,7 +7,7 @@
 #   make lint          — run pylint (must stay 10.00/10)
 #   make check         — lint + unit tests (CI gate)
 #   make run           — start server in stdio mode (local/Claude Desktop)
-#   make run-http      — start server in streamable_http mode (remote)
+#   make run-http      — start server in streamable-http mode (remote)
 #   make docker-build  — build Docker image
 #   make docker-run    — run server via Docker Compose
 #   make docker-stop   — stop Docker Compose services
@@ -35,7 +35,7 @@ run:
 	uv run german-newsfeed-mcp
 
 run-http:
-	MCP_TRANSPORT=streamable_http uv run german-newsfeed-mcp
+	TRANSPORT=streamable-http uv run german-newsfeed-mcp
 
 # ---------------------------------------------------------------------------
 # Docker
@@ -80,7 +80,7 @@ help:
 	@echo "  lint          Run pylint"
 	@echo "  check         lint + test (CI gate)"
 	@echo "  run           Start server in stdio mode"
-	@echo "  run-http      Start server in streamable_http mode"
+	@echo "  run-http      Start server in streamable-http mode"
 	@echo "  docker-build  Build Docker image"
 	@echo "  docker-run    Start via Docker Compose"
 	@echo "  docker-stop   Stop Docker Compose services"

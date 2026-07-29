@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 #: Which MCP transport to use.
 #: - "stdio"            → local Claude Desktop / CLI usage
 #: - "sse"             → Server-Sent Events (legacy, still supported)
-#: - "streamable_http" → HTTP streaming (remote / Docker, newer clients)
+#: - "streamable-http" → HTTP streaming (remote / Docker, newer clients)
 TRANSPORT: str = os.getenv("TRANSPORT", "stdio")
 
 # ---------------------------------------------------------------------------
@@ -49,7 +49,7 @@ LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO").upper()
 # ---------------------------------------------------------------------------
 # Validation
 # ---------------------------------------------------------------------------
-_VALID_TRANSPORTS = {"stdio", "sse", "streamable_http"}
+_VALID_TRANSPORTS = {"stdio", "sse", "streamable-http"}
 if TRANSPORT not in _VALID_TRANSPORTS:
     raise ValueError(
         f"TRANSPORT env var must be one of {sorted(_VALID_TRANSPORTS)}, got {TRANSPORT!r}"

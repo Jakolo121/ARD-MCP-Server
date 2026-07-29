@@ -20,7 +20,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
-    "fastmcp>=2.3.0",
+    "fastmcp>=3.2.4",
     "httpx>=0.27",
 ]
 

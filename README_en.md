@@ -80,7 +80,7 @@ responsibility of whoever operates a given instance.
 | 🔍 **Full-text search** | Search across all available articles                                  |
 | 📺 **Live streams**  | List all available channels and HLS stream URLs                         |
 | ⏱️ **Rate limiter**  | Local token bucket honouring the API's 60/h limit                       |
-| 🚀 **Dual transport** | `stdio` for local Claude Desktop; `streamable_http` for remote / Docker |
+| 🚀 **Dual transport** | `stdio` for local Claude Desktop; `streamable-http` for remote / Docker |
 | 🐳 **Docker-ready**  | Multi-stage image, non-root user, health-check, resource limits         |
 | ✅ **181 tests**     | 160 unit tests + 21 live integration tests                              |
 | 🛠️ **Makefile**      | `make test`, `make lint`, `make docker-build` and more                   |
@@ -188,7 +188,7 @@ Ask your assistant:
 
 ## Remote / Docker Deployment
 
-This mode uses `streamable_http` transport over HTTP. Ideal for servers, cloud VMs, or multi-client setups. Stateless! Legacy sse is still supported!
+This mode uses `streamable-http` transport over HTTP. Ideal for servers, cloud VMs, or multi-client setups. Stateless! Legacy sse is still supported!
 
 ### Prerequisites
 
@@ -256,7 +256,7 @@ All settings are read from environment variables (or a `.env` file).
 
 | Variable              | Default   | Description                                                       |
 | --------------------- | --------- | ------------------------------------------------------------------ |
-| `TRANSPORT`           | `stdio`   | `stdio` or `streamable_http` (`sse` legacy)                        |
+| `TRANSPORT`           | `stdio`   | `stdio` or `streamable-http` (`sse` legacy)                        |
 | `HOST`                | `0.0.0.0` | Bind address (HTTP transports only)                                |
 | `PORT`                | `4200`    | HTTP port (HTTP transports only)                                   |
 | `LOG_LEVEL`           | `INFO`    | DEBUG, INFO, WARNING, ERROR                                        |
@@ -448,7 +448,7 @@ make test-all      # unit + live integration tests
 make lint          # pylint
 make check         # lint + unit tests — use as CI gate
 make run           # start server in stdio mode (Claude Desktop)
-make run-http      # start server in streamable_http mode
+make run-http      # start server in streamable-http mode
 make docker-build  # build Docker image
 make docker-run    # docker compose up -d
 make docker-stop   # docker compose down
@@ -478,7 +478,7 @@ Or:
 make docker-logs
 ```
 
-Common causes: wrong `TRANSPORT` value (must be `streamable_http` in Docker), port already in use.
+Common causes: wrong `TRANSPORT` value (must be `streamable-http` in Docker), port already in use.
 
 ### API timeouts
 

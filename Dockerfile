@@ -9,7 +9,7 @@
 #   docker build -t german-newsfeed-mcp .
 #
 # Run (Streamable HTTP / remote):
-#   docker run -p 8000:8000 -e TRANSPORT=streamable_http german-newsfeed-mcp
+#   docker run -p 8000:8000 -e TRANSPORT=streamable-http german-newsfeed-mcp
 # =============================================================================
 
 # ── Stage 1: builder ──────────────────────────────────────────────────────────
@@ -56,7 +56,7 @@ ENV PATH="/app/.venv/bin:$PATH" \
     PYTHONDONTWRITEBYTECODE=1
 
 # ── Runtime defaults (override via -e or docker-compose env_file) ─────────────
-ENV TRANSPORT=streamable_http \
+ENV TRANSPORT=streamable-http \
     HOST=0.0.0.0 \
     PORT=8000 \
     LOG_LEVEL=INFO
