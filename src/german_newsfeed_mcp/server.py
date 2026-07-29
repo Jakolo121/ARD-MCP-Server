@@ -1,8 +1,9 @@
 """
-FastMCP server assembly for the ARD / Tagesschau MCP Server.
+FastMCP server assembly for the German Newsfeed MCP Server.
 
-Single Responsibility: create the FastMCP instance, register all tools and
-resources, configure logging, and expose a run() entry-point.
+Single Responsibility: composition root — create the FastMCP instance,
+assemble the NewsApiClient with all its dependencies, register all tools
+and resources, configure logging, and expose a run() entry-point.
 
 Nothing else lives here — logic is in tools.py / resources.py.
 """
@@ -11,9 +12,12 @@ import logging
 import logging.config
 from typing import Optional
 
+import httpx
 from fastmcp import FastMCP
 
 from german_newsfeed_mcp import config
+from german_newsfeed_mcp.client import NewsApiClient, build_user_agent
+from german_newsfeed_mcp.rate_limiter import TokenBucketRateLimiter
 from german_newsfeed_mcp.resources import (
     resource_channels,
     resource_homepage,
@@ -41,6 +45,16 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
+# Composition root — assemble the API client with injected dependencies
+# ---------------------------------------------------------------------------
+api_client = NewsApiClient(
+    http_client=httpx.AsyncClient(
+        headers={"User-Agent": build_user_agent(config.USER_AGENT_CONTACT)},
+    ),
+    rate_limiter=TokenBucketRateLimiter(capacity=config.RATE_LIMIT_PER_HOUR),
+)
+
+# ---------------------------------------------------------------------------
 # FastMCP instance
 # ---------------------------------------------------------------------------
 mcp = FastMCP(
@@ -60,7 +74,7 @@ async def get_latest_news(limit: int = 10) -> str:
     Args:
         limit: Maximum number of news items to return (default: 10).
     """
-    return await tool_get_latest_news(limit)
+    return await tool_get_latest_news(api_client, limit)
 
 
 @mcp.tool()
@@ -73,7 +87,7 @@ async def get_news_by_ressort(ressort: str, limit: int = 10) -> str:
                           investigativ, wissen.
         limit: Maximum number of news items to return (default: 10).
     """
-    return await tool_get_news_by_ressort(ressort, limit)
+    return await tool_get_news_by_ressort(api_client, ressort, limit)
 
 
 @mcp.tool()
@@ -94,7 +108,7 @@ async def get_regional_news(
         ressort: Optional category filter.
         limit: Maximum number of news items to return (default: 10).
     """
-    return await tool_get_regional_news(region_id, ressort, limit)
+    return await tool_get_regional_news(api_client, region_id, ressort, limit)
 
 
 @mcp.tool()
@@ -110,13 +124,13 @@ async def search_news(
         page_size: Results per page (default: 10, max: 30).
         result_page: Page number for pagination (default: 0).
     """
-    return await tool_search_news(search_text, page_size, result_page)
+    return await tool_search_news(api_client, search_text, page_size, result_page)
 
 
 @mcp.tool()
 async def get_channels() -> str:
     """Get information about available Tagesschau channels and livestreams."""
-    return await tool_get_channels()
+    return await tool_get_channels(api_client)
 
 
 # ---------------------------------------------------------------------------
@@ -127,31 +141,31 @@ async def get_channels() -> str:
 @mcp.resource("tagesschau://homepage")
 async def homepage_resource() -> str:
     """Get the homepage content from Tagesschau."""
-    return await resource_homepage()
+    return await resource_homepage(api_client)
 
 
 @mcp.resource("tagesschau://news/{ressort}")
 async def news_by_ressort_resource(ressort: str) -> str:
     """Get news by ressort/category."""
-    return await resource_news_by_ressort(ressort)
+    return await resource_news_by_ressort(api_client, ressort)
 
 
 @mcp.resource("tagesschau://regional/{region_id}")
 async def regional_news_resource(region_id: str) -> str:
     """Get regional news for a specific German state."""
-    return await resource_regional_news(region_id)
+    return await resource_regional_news(api_client, region_id)
 
 
 @mcp.resource("tagesschau://search/{search_text}")
 async def search_resource(search_text: str) -> str:
     """Search for news articles by keyword."""
-    return await resource_search(search_text)
+    return await resource_search(api_client, search_text)
 
 
 @mcp.resource("tagesschau://channels")
 async def channels_resource() -> str:
     """Get information about available Tagesschau channels and livestreams."""
-    return await resource_channels()
+    return await resource_channels(api_client)
 
 
 # ---------------------------------------------------------------------------

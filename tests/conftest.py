@@ -1,12 +1,19 @@
 """
-Shared pytest fixtures for the ARD MCP test suite.
+Shared pytest fixtures for the German Newsfeed MCP test suite.
 
 Provides:
 - Mock API response payloads that mirror the real Tagesschau API schema.
-- A patch_fetch fixture that replaces fetch_from_api with a controllable stub.
+- FakeNewsApi: a test double for client.NewsApiClient (unit tests).
+- live_api: a real NewsApiClient for integration tests.
 """
 
+from unittest.mock import AsyncMock
+
+import httpx
 import pytest
+
+from german_newsfeed_mcp.client import NewsApiClient, build_user_agent
+from german_newsfeed_mcp.rate_limiter import TokenBucketRateLimiter
 
 
 # ---------------------------------------------------------------------------
@@ -182,3 +189,31 @@ def channels_response():
 def error_response():
     """Return a sample error dict (as returned by fetch_from_api on failure)."""
     return dict(ERROR_RESPONSE)
+
+
+# ---------------------------------------------------------------------------
+# API client test doubles
+# ---------------------------------------------------------------------------
+
+
+class FakeNewsApi:
+    """Test double for client.NewsApiClient.
+
+    fetch_from_api / get_news are AsyncMocks, so tests can both stub
+    return values and assert on call arguments.
+    """
+
+    def __init__(self, fetch_response=None, news_response=None):
+        self.fetch_from_api = AsyncMock(return_value=fetch_response)
+        self.get_news = AsyncMock(return_value=news_response)
+
+
+@pytest.fixture()
+async def live_api():
+    """Real NewsApiClient for integration tests (internet required)."""
+    http_client = httpx.AsyncClient(headers={"User-Agent": build_user_agent()})
+    yield NewsApiClient(
+        http_client=http_client,
+        rate_limiter=TokenBucketRateLimiter(capacity=60),
+    )
+    await http_client.aclose()

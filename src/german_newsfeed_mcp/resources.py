@@ -3,6 +3,9 @@ MCP resource implementations for the ARD / Tagesschau MCP Server.
 
 Single Responsibility: business logic for each MCP resource URI.
 Plain async functions — @mcp.resource() decorators are applied in server.py.
+
+Each function receives the NewsApiClient as its first argument — injected
+by the composition root in server.py.
 """
 # The short "fetch channels / validate ressort" patterns are intentionally
 # mirrored in tools.py — they are minimal glue, not extractable further.
@@ -11,17 +14,17 @@ Plain async functions — @mcp.resource() decorators are applied in server.py.
 import logging
 from typing import Optional
 
-from german_newsfeed_mcp.client import ENDPOINTS, fetch_from_api, get_news
+from german_newsfeed_mcp.client import ENDPOINTS, NewsApiClient
 from german_newsfeed_mcp.formatters import format_channels, format_news_list
 from german_newsfeed_mcp.validators import VALID_REGION_IDS, validate_ressort
 
 logger = logging.getLogger(__name__)
 
 
-async def resource_homepage() -> str:
+async def resource_homepage(api: NewsApiClient) -> str:
     """Return the current Tagesschau homepage news (tagesschau://homepage)."""
     logger.info("resource_homepage")
-    response = await fetch_from_api(ENDPOINTS["homepage"])
+    response = await api.fetch_from_api(ENDPOINTS["homepage"])
 
     if "error" in response:
         return f"Error fetching homepage: {response['message']}"
@@ -30,10 +33,11 @@ async def resource_homepage() -> str:
     return format_news_list(news_items)
 
 
-async def resource_news_by_ressort(ressort: str) -> str:
+async def resource_news_by_ressort(api: NewsApiClient, ressort: str) -> str:
     """Return news for a category (tagesschau://news/{ressort}).
 
     Args:
+        api:     Injected client for upstream API access.
         ressort: Category slug.
     """
     logger.info("resource_news_by_ressort ressort=%s", ressort)
@@ -42,7 +46,7 @@ async def resource_news_by_ressort(ressort: str) -> str:
     if error:
         return error
 
-    result = await get_news({"ressort": ressort})
+    result = await api.get_news({"ressort": ressort})
     if "error" in result:
         return f"Error fetching news: {result['message']}"
 
@@ -50,12 +54,14 @@ async def resource_news_by_ressort(ressort: str) -> str:
 
 
 async def resource_regional_news(
+    api: NewsApiClient,
     region_id: str,
     ressort: Optional[str] = None,
 ) -> str:
     """Return regional news (tagesschau://regional/{region_id}).
 
     Args:
+        api:       Injected client for upstream API access.
         region_id: String representation of an integer 1–16.
         ressort:   Optional category filter.
     """
@@ -78,7 +84,7 @@ async def resource_regional_news(
             return error
         params["ressort"] = ressort
 
-    result = await get_news(params)
+    result = await api.get_news(params)
     if "error" in result:
         return f"Error fetching regional news: {result['message']}"
 
@@ -86,6 +92,7 @@ async def resource_regional_news(
 
 
 async def resource_search(
+    api: NewsApiClient,
     search_text: str,
     page_size: Optional[int] = None,
     result_page: Optional[int] = None,
@@ -93,6 +100,7 @@ async def resource_search(
     """Return search results (tagesschau://search/{search_text}).
 
     Args:
+        api:         Injected client for upstream API access.
         search_text: The search query.
         page_size:   Optional results per page (1–30).
         result_page: Optional zero-based page number.
@@ -113,7 +121,7 @@ async def resource_search(
     if result_page is not None:
         params["resultPage"] = str(result_page)
 
-    response = await fetch_from_api(ENDPOINTS["search"], params)
+    response = await api.fetch_from_api(ENDPOINTS["search"], params)
 
     if "error" in response:
         return f"Error searching news: {response['message']}"
@@ -127,11 +135,15 @@ async def resource_search(
     return format_news_list(search_results, limit)
 
 
-async def resource_channels() -> str:
-    """Return channel information (tagesschau://channels)."""
+async def resource_channels(api: NewsApiClient) -> str:
+    """Return channel information (tagesschau://channels).
+
+    Args:
+        api: Injected client for upstream API access.
+    """
     logger.info("resource_channels")
 
-    response = await fetch_from_api(ENDPOINTS["channels"])
+    response = await api.fetch_from_api(ENDPOINTS["channels"])
 
     if "error" in response:
         return f"Error fetching channels: {response['message']}"

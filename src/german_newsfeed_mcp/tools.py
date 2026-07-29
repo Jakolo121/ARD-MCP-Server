@@ -5,12 +5,15 @@ Single Responsibility: business logic for each MCP tool.
 These are plain async functions — the @mcp.tool() decorator is applied in
 server.py.  This decoupling makes the logic independently testable without
 needing a running FastMCP instance.
+
+Each function receives the NewsApiClient as its first argument — injected
+by the composition root in server.py.
 """
 
 import logging
 from typing import Optional
 
-from german_newsfeed_mcp.client import ENDPOINTS, fetch_from_api, get_news
+from german_newsfeed_mcp.client import ENDPOINTS, NewsApiClient
 from german_newsfeed_mcp.formatters import _format_streams, format_channels, format_news_list
 from german_newsfeed_mcp.validators import VALID_REGION_IDS, VALID_RESSORTS, normalise_ressort, validate_ressort
 
@@ -38,14 +41,19 @@ _REGION_RESSORT_WARNING = (
 # ---------------------------------------------------------------------------
 
 
-async def tool_get_latest_news(limit: int = 10) -> str:
-    """Return the latest headlines from the Tagesschau homepage."""
+async def tool_get_latest_news(api: NewsApiClient, limit: int = 10) -> str:
+    """Return the latest headlines from the Tagesschau homepage.
+
+    Args:
+        api:   Injected client for upstream API access.
+        limit: Maximum number of items (default 10).
+    """
     logger.info("tool_get_latest_news limit=%d", limit)
 
     if limit <= 0:
         return "ℹ️ limit=0 — no items requested. Please specify a limit ≥ 1."
 
-    response = await fetch_from_api(ENDPOINTS["homepage"])
+    response = await api.fetch_from_api(ENDPOINTS["homepage"])
 
     if "error" in response:
         return f"Error fetching news: {response['message']}"
@@ -62,10 +70,15 @@ async def tool_get_latest_news(limit: int = 10) -> str:
     return result
 
 
-async def tool_get_news_by_ressort(ressort: str, limit: int = 10) -> str:
+async def tool_get_news_by_ressort(
+    api: NewsApiClient,
+    ressort: str,
+    limit: int = 10,
+) -> str:
     """Return news filtered by category (Ressort).
 
     Args:
+        api:     Injected client for upstream API access.
         ressort: One of inland | ausland | wirtschaft | sport |
                  video | investigativ | wissen.
         limit:   Maximum number of items (default 10).
@@ -80,7 +93,7 @@ async def tool_get_news_by_ressort(ressort: str, limit: int = 10) -> str:
     if error:
         return error
 
-    result = await get_news({"ressort": ressort}, limit)
+    result = await api.get_news({"ressort": ressort}, limit)
     if "error" in result:
         return f"Error fetching news: {result['message']}"
 
@@ -99,6 +112,7 @@ async def tool_get_news_by_ressort(ressort: str, limit: int = 10) -> str:
 
 
 async def tool_get_regional_news(
+    api: NewsApiClient,
     region_id: int,
     ressort: Optional[str] = None,
     limit: int = 10,
@@ -106,6 +120,7 @@ async def tool_get_regional_news(
     """Return news for a specific German federal state.
 
     Args:
+        api:       Injected client for upstream API access.
         region_id: 1–16 (1=Baden-Württemberg … 16=Thüringen).
         ressort:   Optional category filter.
         limit:     Maximum number of items (default 10).
@@ -132,7 +147,7 @@ async def tool_get_regional_news(
             return error
         params["ressort"] = ressort
 
-    result = await get_news(params, limit)
+    result = await api.get_news(params, limit)
     if "error" in result:
         return f"Error fetching regional news: {result['message']}"
 
@@ -154,6 +169,7 @@ async def tool_get_regional_news(
 
 
 async def tool_search_news(
+    api: NewsApiClient,
     search_text: str,
     page_size: int = 10,
     result_page: int = 0,
@@ -161,6 +177,7 @@ async def tool_search_news(
     """Search for news articles by keyword.
 
     Args:
+        api:         Injected client for upstream API access.
         search_text: Search query string.
         page_size:   Results per page (1–30, default 10).
         result_page: Zero-based page number (default 0).
@@ -174,7 +191,7 @@ async def tool_search_news(
 
     page_size = max(1, min(page_size, 30))
 
-    response = await fetch_from_api(
+    response = await api.fetch_from_api(
         ENDPOINTS["search"],
         {
             "searchText": search_text,
@@ -227,11 +244,15 @@ async def tool_search_news(
     return "\n".join(lines)
 
 
-async def tool_get_channels() -> str:
-    """Return available Tagesschau channels and livestream information."""
+async def tool_get_channels(api: NewsApiClient) -> str:
+    """Return available Tagesschau channels and livestream information.
+
+    Args:
+        api: Injected client for upstream API access.
+    """
     logger.info("tool_get_channels")
 
-    response = await fetch_from_api(ENDPOINTS["channels"])
+    response = await api.fetch_from_api(ENDPOINTS["channels"])
 
     if "error" in response:
         return f"Error fetching channels: {response['message']}"
