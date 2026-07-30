@@ -1,1 +1,1 @@
-"""Test suite for the ARD / Tagesschau MCP Server."""
+"""Test suite for the German Newsfeed MCP Server."""

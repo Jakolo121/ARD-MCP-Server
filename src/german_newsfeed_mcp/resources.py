@@ -1,5 +1,5 @@
 """
-MCP resource implementations for the ARD / Tagesschau MCP Server.
+MCP resource implementations for the German Newsfeed MCP Server.
 
 Single Responsibility: business logic for each MCP resource URI.
 Plain async functions — @mcp.resource() decorators are applied in server.py.

@@ -1,5 +1,5 @@
 # =============================================================================
-# ARD MCP Server — Makefile
+# German Newsfeed MCP Server — Makefile
 # =============================================================================
 # Usage:
 #   make test          — run unit tests (no network)
@@ -73,7 +73,7 @@ clean:
 
 help:
 	@echo ""
-	@echo "ARD MCP Server — available targets:"
+	@echo "German Newsfeed MCP Server — available targets:"
 	@echo ""
 	@echo "  test          Run unit tests (fast, no network)"
 	@echo "  test-all      Run ALL tests including live API calls"

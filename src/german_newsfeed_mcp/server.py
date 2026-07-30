@@ -182,7 +182,7 @@ def run() -> None:
         streamable-http – Streamable HTTP, stateless, endpoint: /mcp
     """
     logger.info(
-        "Starting Tagesschau MCP server — transport=%s host=%s port=%d",
+        "Starting German Newsfeed MCP server — transport=%s host=%s port=%d",
         config.TRANSPORT,
         config.HOST,
         config.PORT,

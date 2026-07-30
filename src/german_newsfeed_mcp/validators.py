@@ -1,5 +1,5 @@
 """
-Shared validation helpers and domain constants for the ARD MCP Server.
+Shared validation helpers and domain constants for the German Newsfeed MCP Server.
 
 Single Responsibility: pure validation functions and the domain constant sets
 they operate on — no I/O, no side effects, fully unit-testable.

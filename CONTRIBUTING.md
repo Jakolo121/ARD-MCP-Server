@@ -1,4 +1,4 @@
-# Contributing to ARD MCP Server
+# Contributing to German Newsfeed MCP Server
 
 Thank you for your interest in contributing! This document covers everything you need to get started.
 

@@ -1,5 +1,5 @@
 # =============================================================================
-# ARD / Tagesschau MCP Server — Docker Compose
+# German Newsfeed MCP Server — Docker Compose
 #
 # Usage:
 #   docker compose up           # start in foreground
@@ -29,8 +29,11 @@ services:
       PORT: "8000"
       LOG_LEVEL: INFO
 
+    # Deliberately bound to loopback only — the HTTP transport has no
+    # authentication. If you expose this externally, put an authenticating
+    # reverse proxy in front.
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
 
     # Restart policy — sensible default for production
     restart: unless-stopped
@@ -44,9 +47,11 @@ services:
         reservations:
           memory: 64M
 
+    # Health check follows the PORT env var so an overridden port does not
+    # leave the container permanently unhealthy.
     healthcheck:
       test: ["CMD", "python", "-c",
-             "import httpx; httpx.get('http://localhost:8000/mcp', timeout=3)"]
+             "import os, httpx; httpx.get('http://localhost:' + os.environ.get('PORT', '8000') + '/mcp', timeout=3)"]
       interval: 30s
       timeout: 5s
       retries: 3

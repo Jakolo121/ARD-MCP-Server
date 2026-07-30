@@ -1,5 +1,5 @@
 """
-Configuration module for the ARD MCP Server.
+Configuration module for the German Newsfeed MCP Server.
 
 All settings are driven by environment variables with sensible defaults.
 No external dependency required — uses only the standard library.

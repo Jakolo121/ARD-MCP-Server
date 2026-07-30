@@ -1,5 +1,5 @@
 # =============================================================================
-# ARD / Tagesschau MCP Server — Docker image
+# German Newsfeed MCP Server — Docker image
 #
 # Multi-stage build:
 #   builder  – installs dependencies via uv into a virtual-env

@@ -189,7 +189,28 @@ Ask your assistant:
 
 ## Remote / Docker Deployment
 
-This mode uses `streamable-http` transport over HTTP. Ideal for servers, cloud VMs, or multi-client setups. Stateless! Legacy sse is still supported!
+Self-hosting for your own or team-internal use. The recommended default
+is `stdio` (see [Quick Start](#quick-start-local-claude-desktop));
+the `streamable-http` transport is an option you choose deliberately.
+
+**Security note:** The HTTP transport has no authentication. Do not
+expose it publicly without an authentication layer in front (e.g. a
+reverse proxy) — the Compose setup therefore deliberately binds the port
+to `127.0.0.1` only. Whoever makes an instance reachable for third
+parties becomes the responsible operator under the
+[terms of use](#data-source-and-terms-of-use).
+
+**Rate limiter limitations:** `stateless_http=True` refers to MCP
+sessions, not to the rate limiter. The token bucket is process-local
+in-memory state. Two limitations follow:
+
+1. Multiple replicas against the same upstream API multiply the request
+   budget. This is not intended — run exactly one instance.
+2. A container restart resets the bucket to full. Combined with
+   `restart: unless-stopped` and a crash loop, this can exceed the
+   limit. Watch the logs.
+
+(The legacy `sse` transport is still supported.)
 
 ### Prerequisites
 
@@ -240,7 +261,7 @@ make docker-logs
     },
 ```
 
-For external servers: replace `localhost` with your server's IP or domain and open port 8000.
+For external servers: put an authentication layer in front first (see the security note above), then adjust the loopback binding in `docker-compose.yml` and replace `localhost` with your proxy's address.
 
 ### Stop / Update
 
@@ -263,6 +284,10 @@ All settings are read from environment variables (or a `.env` file).
 | `LOG_LEVEL`           | `INFO`    | DEBUG, INFO, WARNING, ERROR                                         |
 | `RATE_LIMIT_PER_HOUR` | `60`      | Local request budget per hour towards the upstream API              |
 | `USER_AGENT_CONTACT`  | —         | Optional: contact info in the User-Agent header; omitted when unset |
+
+The defaults apply when running directly (`uv run german-newsfeed-mcp`).
+The Compose setup overrides them: it sets `HOST=0.0.0.0` and `PORT=8000`
+(see `docker-compose.yml`).
 
 ---
 

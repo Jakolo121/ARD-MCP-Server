@@ -1,5 +1,5 @@
 """
-MCP tool implementations for the ARD / Tagesschau MCP Server.
+MCP tool implementations for the German Newsfeed MCP Server.
 
 Single Responsibility: business logic for each MCP tool.
 These are plain async functions — the @mcp.tool() decorator is applied in

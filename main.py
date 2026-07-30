@@ -1,4 +1,4 @@
-"""Entry point for the ARD / Tagesschau MCP Server.
+"""Entry point for the German Newsfeed MCP Server.
 
 This file is intentionally thin — all logic lives under src/german_newsfeed_mcp/.
 Run with:

@@ -191,7 +191,28 @@ Frage KI-Assistenten:
 
 ## Remote / Docker-Deployment
 
-Der `streamable-http`-Transport nutzt HTTP. Geeignet für Server, Cloud-VMs oder Multi-Client-Setup. Stateless! Legacy sse wird noch supportet!
+Self-Hosting für die eigene oder teaminterne Nutzung. Der empfohlene
+Standardweg ist `stdio` (siehe [Schnellstart](#schnellstart-lokal-claude-desktop));
+der `streamable-http`-Transport ist eine bewusst zu wählende Option.
+
+**Sicherheitshinweis:** Der HTTP-Transport hat keine Authentifizierung.
+Nicht ohne vorgelagerte Authentifizierung (z. B. Reverse Proxy) öffentlich
+exponieren — das Compose-Setup bindet den Port deshalb bewusst nur an
+`127.0.0.1`. Wer eine Instanz für Dritte erreichbar macht, wird zum
+verantwortlichen Betreiber im Sinne der
+[Nutzungsbedingungen](#datenquelle-und-nutzungsbedingungen).
+
+**Grenzen des Rate Limiters:** `stateless_http=True` bezieht sich auf
+MCP-Sessions, nicht auf den Rate Limiter. Der Token-Bucket ist
+prozesslokaler In-Memory-Zustand. Daraus folgen zwei Einschränkungen:
+
+1. Mehrere Replicas gegen dieselbe Upstream-API vervielfachen das
+   Anfragebudget. Das ist nicht vorgesehen — genau eine Instanz betreiben.
+2. Ein Container-Neustart setzt den Bucket auf voll zurück. In Kombination
+   mit `restart: unless-stopped` und einem Crashloop kann das Limit dadurch
+   überschritten werden. Logs beobachten.
+
+(Der Legacy-Transport `sse` wird weiterhin unterstützt.)
 
 ### Voraussetzungen
 
@@ -242,7 +263,7 @@ make docker-logs
     },
 ```
 
-Für externe Server: `localhost` durch IP oder Domain ersetzen, Port 8000 freigeben.
+Für externe Server: erst eine Authentifizierung vorschalten (siehe Sicherheitshinweis oben), dann das Loopback-Binding in `docker-compose.yml` anpassen und `localhost` durch die Adresse des Proxys ersetzen.
 
 ### Stoppen / Aktualisieren
 
@@ -265,6 +286,10 @@ Alle Einstellungen kommen aus Umgebungsvariablen oder `.env`.
 | `LOG_LEVEL`           | `INFO`    | DEBUG, INFO, WARNING, ERROR                                                |
 | `RATE_LIMIT_PER_HOUR` | `60`      | Lokales Anfragelimit pro Stunde gegenüber der Upstream-API                 |
 | `USER_AGENT_CONTACT`  | —         | Optional: Kontaktangabe im User-Agent-Header; entfällt, wenn nicht gesetzt |
+
+Die Standardwerte gelten für den direkten Start (`uv run german-newsfeed-mcp`).
+Das Compose-Setup überschreibt sie: dort werden `HOST=0.0.0.0` und `PORT=8000`
+gesetzt (siehe `docker-compose.yml`).
 
 ---
 
