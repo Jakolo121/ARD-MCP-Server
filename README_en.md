@@ -1,14 +1,19 @@
 # German Newsfeed MCP Server
 
-> **Disclaimer:** This is an unofficial project. It has no affiliation with ARD, ARD-aktuell, or NDR; it is neither operated nor endorsed nor approved by them. "ARD" and "tagesschau" are trademarks of their respective owners and are referenced here solely to describe the API this server talks to.
+> **Disclaimer:** This is a private, unofficial project. It is not an ARD
+> product and is neither operated nor endorsed by ARD,
+> ARD-aktuell, or NDR. It is developed independently of the author's
+> professional employment. "ARD" and "tagesschau" are trademarks of their
+> respective owners and are named here solely to describe the API being
+> accessed.
 
-This project merely connects the public API to an MCP-capable AI
-assistant. ARD-aktuell is responsible for the API itself, its
-operation, and its content; this project cannot provide information
-on any of those. Please raise any concerns about this project, in
-particular from rights holders, as a
-[GitHub issue](https://github.com/Jakolo121/german-newsfeed-mcp/issues).
-Substantiated concerns will be addressed promptly.
+> This project merely connects the public API to an MCP-capable AI
+> assistant. ARD-aktuell is responsible for the API itself, its
+> operation, and its content; this project cannot provide information
+> on any of those. Please raise any concerns about this project, in
+> particular from rights holders, as a
+> [GitHub issue](https://github.com/Jakolo121/german-newsfeed-mcp/issues).
+> Substantiated concerns will be addressed promptly.
 
 ## In thirty seconds
 

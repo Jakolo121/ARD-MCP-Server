@@ -2,15 +2,20 @@
 
 # German Newsfeed MCP Server
 
-> **Disclaimer:** Dies ist ein inoffizielles Projekt. Es besteht keine Verbindung zu ARD, ARD-aktuell oder NDR; das Projekt wird von diesen weder betrieben noch unterstützt noch genehmigt. „ARD" und „tagesschau" sind Marken der jeweiligen Rechteinhaber und werden hier ausschließlich zur Beschreibung der angesprochenen Schnittstelle genannt.
+> **Disclaimer:** Dies ist ein privates, inoffizielles Projekt. Es ist kein
+> Angebot der ARD und wird von ARD, ARD-aktuell oder NDR weder betrieben
+> noch unterstützt. Es entsteht unabhängig von jeder
+> beruflichen Tätigkeit der Autorin. „ARD" und „tagesschau" sind Marken der
+> jeweiligen Rechteinhaber und werden hier ausschließlich zur Beschreibung
+> der angesprochenen Schnittstelle genannt.
 
-Dieses Projekt stellt lediglich eine Verbindung zwischen der
-öffentlichen Schnittstelle und einem MCP-fähigen KI-Assistenten her.
-Für die Schnittstelle selbst, ihren Betrieb und ihre Inhalte ist
-ARD-aktuell verantwortlich; dieses Projekt kann dazu keine Auskunft
-geben. Hinweise zum Projekt, insbesondere von Rechteinhabern, bitte
-als [GitHub-Issue](https://github.com/Jakolo121/german-newsfeed-mcp/issues).
-Auf begründete Hinweise wird zeitnah reagiert.
+> Dieses Projekt stellt lediglich eine Verbindung zwischen der
+> öffentlichen Schnittstelle und einem MCP-fähigen KI-Assistenten her.
+> Für die Schnittstelle selbst, ihren Betrieb und ihre Inhalte ist
+> die ARD verantwortlich; dieses Projekt kann dazu keine Auskunft
+> geben. Hinweise zum Projekt, insbesondere von Rechteinhabern, bitte
+> als [GitHub-Issue](https://github.com/Jakolo121/german-newsfeed-mcp/issues).
+> Auf begründete Hinweise wird zeitnah reagiert.
 
 ## In dreißig Sekunden
 

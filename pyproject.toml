@@ -1,7 +1,7 @@
 [project]
 name = "german-newsfeed-mcp"
 version = "1.0.0"
-description = "MCP server for the public news API of tagesschau.de, including regional news from the ARD"
+description = "MCP server for the public news API of tagesschau.de, including regional news from ARD broadcasters"
 readme = "README.md"
 license = { text = "Apache-2.0" }
 authors = [

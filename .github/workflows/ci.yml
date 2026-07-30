@@ -41,4 +41,6 @@ jobs:
       - name: Install dependencies
         run: uv sync --extra dev
       - name: Live integration tests against the real API
+        env:
+          USER_AGENT_CONTACT: ${{ vars.USER_AGENT_CONTACT }}
         run: uv run pytest tests/ -m integration -q
