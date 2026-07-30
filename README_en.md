@@ -32,7 +32,8 @@ Language:
 11. [Running the Tests](#running-the-tests)
 12. [Makefile Reference](#makefile-reference)
 13. [Troubleshooting](#troubleshooting)
-14. [License & Acknowledgements](#license--acknowledgements)
+14. [Contact](#contact)
+15. [License & Acknowledgements](#license--acknowledgements)
 
 ---
 
@@ -74,17 +75,17 @@ responsibility of whoever operates a given instance.
 
 ## Features
 
-|                      |                                                                          |
-| -------------------- | ------------------------------------------------------------------------ |
-| 🗞️ **Live news**     | Fetches breaking news, categorised news, and regional news in real time |
-| 🔍 **Full-text search** | Search across all available articles                                  |
-| 📺 **Live streams**  | List all available channels and HLS stream URLs                         |
-| ⏱️ **Rate limiter**  | Local token bucket honouring the API's 60/h limit                       |
-| 🚀 **Dual transport** | `stdio` for local Claude Desktop; `streamable-http` for remote / Docker |
-| 🐳 **Docker-ready**  | Multi-stage image, non-root user, health-check, resource limits         |
-| ✅ **181 tests**     | 160 unit tests + 21 live integration tests                              |
-| 🛠️ **Makefile**      | `make test`, `make lint`, `make docker-build` and more                   |
-| 🔒 **No secrets**    | Public API, no API keys                                                  |
+|                         |                                                                         |
+| ----------------------- | ----------------------------------------------------------------------- |
+| 🗞️ **Live news**        | Fetches breaking news, categorised news, and regional news in real time |
+| 🔍 **Full-text search** | Search across all available articles                                    |
+| 📺 **Live streams**     | List all available channels and HLS stream URLs                         |
+| ⏱️ **Rate limiter**     | Local token bucket honouring the API's 60/h limit                       |
+| 🚀 **Dual transport**   | `stdio` for local Claude Desktop; `streamable-http` for remote / Docker |
+| 🐳 **Docker-ready**     | Multi-stage image, non-root user, health-check, resource limits         |
+| ✅ **181 tests**        | 160 unit tests + 21 live integration tests                              |
+| 🛠️ **Makefile**         | `make test`, `make lint`, `make docker-build` and more                  |
+| 🔒 **No secrets**       | Public API, no API keys                                                 |
 
 ---
 
@@ -254,13 +255,13 @@ docker compose up --build -d
 
 All settings are read from environment variables (or a `.env` file).
 
-| Variable              | Default   | Description                                                       |
-| --------------------- | --------- | ------------------------------------------------------------------ |
-| `TRANSPORT`           | `stdio`   | `stdio` or `streamable-http` (`sse` legacy)                        |
-| `HOST`                | `0.0.0.0` | Bind address (HTTP transports only)                                |
-| `PORT`                | `4200`    | HTTP port (HTTP transports only)                                   |
-| `LOG_LEVEL`           | `INFO`    | DEBUG, INFO, WARNING, ERROR                                        |
-| `RATE_LIMIT_PER_HOUR` | `60`      | Local request budget per hour towards the upstream API             |
+| Variable              | Default   | Description                                                         |
+| --------------------- | --------- | ------------------------------------------------------------------- |
+| `TRANSPORT`           | `stdio`   | `stdio` or `streamable-http` (`sse` legacy)                         |
+| `HOST`                | `0.0.0.0` | Bind address (HTTP transports only)                                 |
+| `PORT`                | `4200`    | HTTP port (HTTP transports only)                                    |
+| `LOG_LEVEL`           | `INFO`    | DEBUG, INFO, WARNING, ERROR                                         |
+| `RATE_LIMIT_PER_HOUR` | `60`      | Local request budget per hour towards the upstream API              |
 | `USER_AGENT_CONTACT`  | —         | Optional: contact info in the User-Agent header; omitted when unset |
 
 ---
@@ -328,8 +329,8 @@ _(No parameters)_
 
 Resources are addressable URIs that MCP clients can read directly.
 
-| URI                                 | Description                  |
-| ----------------------------------- | ---------------------------- |
+| URI                                      | Description                  |
+| ---------------------------------------- | ---------------------------- |
 | `news://tagesschau/homepage`             | Homepage top stories         |
 | `news://tagesschau/news/{ressort}`       | News by category             |
 | `news://tagesschau/regional/{region_id}` | Regional news by state ID    |
@@ -364,15 +365,15 @@ make run
 
 Each module has exactly one responsibility:
 
-| Module            | Responsibility                                         |
-| ----------------- | ------------------------------------------------------ |
-| `config.py`       | Read & expose env vars                                 |
-| `client.py`       | HTTP requests + error handling                         |
-| `rate_limiter.py` | Local request budget (token bucket)                    |
-| `validators.py`   | Domain constants (`VALID_RESSORTS`) + input validation |
-| `formatters.py`   | Turn raw API dicts into Markdown                       |
-| `tools.py`        | Validate inputs, call client, call formatter           |
-| `resources.py`    | Same as tools but for MCP resources                    |
+| Module            | Responsibility                                               |
+| ----------------- | ------------------------------------------------------------ |
+| `config.py`       | Read & expose env vars                                       |
+| `client.py`       | HTTP requests + error handling                               |
+| `rate_limiter.py` | Local request budget (token bucket)                          |
+| `validators.py`   | Domain constants (`VALID_RESSORTS`) + input validation       |
+| `formatters.py`   | Turn raw API dicts into Markdown                             |
+| `tools.py`        | Validate inputs, call client, call formatter                 |
+| `resources.py`    | Same as tools but for MCP resources                          |
 | `server.py`       | Composition root: assemble FastMCP, register handlers, start |
 
 ### Adding a new tool
@@ -503,4 +504,4 @@ Apache License 2.0.
 
 The delivered news items are content of the ARD broadcasters, subject to their rights and the terms of use of tagesschau.de — see [Data Source and Terms of Use](#data-source-and-terms-of-use).
 
-Thanks to **[AndreasFischer1985](https://github.com/AndreasFischer1985)** and the bund.dev community for documenting the API.
+Thanks to **[AndreasFischer1985](https://github.com/AndreasFischer1985)**, the bund.dev community for documenting the API and above all to the journalists at the ARD broadcasters, whose work this project merely passes along.

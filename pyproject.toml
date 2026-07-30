@@ -5,7 +5,7 @@ description = "MCP server for the public news API of tagesschau.de, including re
 readme = "README.md"
 license = { text = "Apache-2.0" }
 authors = [
-    { name = "Isabell Lorenzo-Reichardt", email = "Bereichardt@gmail.com" }
+    { name = "Isabell Lorenzo-Reichardt", email = "isabell@i22y.de" }
 ]
 requires-python = ">=3.12"
 keywords = ["mcp", "mcp-server", "news", "tagesschau", "german-news", "llm"]

@@ -32,7 +32,8 @@ Sprache:
 11. [Tests](#tests)
 12. [Makefile-Referenz](#makefile-referenz)
 13. [Fehlerbehebung](#fehlerbehebung)
-14. [Lizenz & Danksagung](#lizenz--danksagung)
+14. [Kontakt](#kontakt)
+15. [Lizenz & Danksagung](#lizenz--danksagung)
 
 ---
 
@@ -256,13 +257,13 @@ docker compose up --build -d
 
 Alle Einstellungen kommen aus Umgebungsvariablen oder `.env`.
 
-| Variable              | Standard  | Beschreibung                                                        |
-| --------------------- | --------- | ------------------------------------------------------------------- |
-| `TRANSPORT`           | `stdio`   | `stdio` oder `streamable-http` (`sse` legacy)                       |
-| `HOST`                | `0.0.0.0` | Bind-Adresse (nur HTTP-Transporte)                                  |
-| `PORT`                | `4200`    | HTTP-Port (nur HTTP-Transporte)                                     |
-| `LOG_LEVEL`           | `INFO`    | DEBUG, INFO, WARNING, ERROR                                         |
-| `RATE_LIMIT_PER_HOUR` | `60`      | Lokales Anfragelimit pro Stunde gegenüber der Upstream-API          |
+| Variable              | Standard  | Beschreibung                                                               |
+| --------------------- | --------- | -------------------------------------------------------------------------- |
+| `TRANSPORT`           | `stdio`   | `stdio` oder `streamable-http` (`sse` legacy)                              |
+| `HOST`                | `0.0.0.0` | Bind-Adresse (nur HTTP-Transporte)                                         |
+| `PORT`                | `4200`    | HTTP-Port (nur HTTP-Transporte)                                            |
+| `LOG_LEVEL`           | `INFO`    | DEBUG, INFO, WARNING, ERROR                                                |
+| `RATE_LIMIT_PER_HOUR` | `60`      | Lokales Anfragelimit pro Stunde gegenüber der Upstream-API                 |
 | `USER_AGENT_CONTACT`  | —         | Optional: Kontaktangabe im User-Agent-Header; entfällt, wenn nicht gesetzt |
 
 ---
@@ -330,8 +331,8 @@ _(Keine Parameter)_
 
 URIs, die MCP-Clients lesen können.
 
-| URI                                 | Beschreibung               |
-| ----------------------------------- | -------------------------- |
+| URI                                      | Beschreibung               |
+| ---------------------------------------- | -------------------------- |
 | `news://tagesschau/homepage`             | Top-Meldungen              |
 | `news://tagesschau/news/{ressort}`       | Nachrichten nach Kategorie |
 | `news://tagesschau/regional/{region_id}` | Regionalnachrichten        |
@@ -507,4 +508,4 @@ Apache License 2.0.
 
 Die ausgelieferten Nachrichten sind Inhalte der ARD-Anstalten, unterliegen deren Rechten und den Nutzungsbedingungen von tagesschau.de — siehe [Datenquelle und Nutzungsbedingungen](#datenquelle-und-nutzungsbedingungen).
 
-Danke an **[AndreasFischer1985](https://github.com/AndreasFischer1985)** und die bund.dev-Community für die Dokumentation der Schnittstelle.
+Danke an **[AndreasFischer1985](https://github.com/AndreasFischer1985)** , die bund.dev-Community für die Dokumentation der Schnittstelle und vor allem an die Journalist:innen der ARD-Anstalten, deren Arbeit dieses Projekt lediglich weiterreicht.
