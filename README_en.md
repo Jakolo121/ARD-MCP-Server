@@ -2,6 +2,14 @@
 
 > **Disclaimer:** This is an unofficial project. It has no affiliation with ARD, ARD-aktuell, or NDR; it is neither operated nor endorsed nor approved by them. "ARD" and "tagesschau" are trademarks of their respective owners and are referenced here solely to describe the API this server talks to.
 
+This project merely connects the public API to an MCP-capable AI
+assistant. ARD-aktuell is responsible for the API itself, its
+operation, and its content; this project cannot provide information
+on any of those. Please raise any concerns about this project, in
+particular from rights holders, as a
+[GitHub issue](https://github.com/Jakolo121/german-newsfeed-mcp/issues).
+Substantiated concerns will be addressed promptly.
+
 > MCP server for the public news API of tagesschau.de.  
 > A production-ready [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server that brings live German news into your AI assistant.
 
@@ -32,8 +40,7 @@ Language:
 11. [Running the Tests](#running-the-tests)
 12. [Makefile Reference](#makefile-reference)
 13. [Troubleshooting](#troubleshooting)
-14. [Contact](#contact)
-15. [License & Acknowledgements](#license--acknowledgements)
+14. [License & Acknowledgements](#license--acknowledgements)
 
 ---
 
@@ -62,7 +69,7 @@ https://www.tagesschau.de/nutzungsbedingungen/
 
 The API is not officially documented. Community documentation is
 available at bund.dev (https://tagesschau.api.bund.dev). bund.dev is a
-civil-society documentation project — neither the operator of the API
+civil-society documentation project, neither the operator of the API
 nor a rights holder of the content. Its documentation served as a
 reference for this project but does not grant any usage rights.
 
@@ -127,16 +134,16 @@ german-newsfeed-mcp/
 
 ## Quick Start Local (Claude Desktop)
 
-Also applicable to other AI assistants — edit their respective config instead. This mode uses `stdio` transport; the server is launched as a child process. No port is needed.
+Also applicable to other AI assistants, edit their respective config instead. This mode uses `stdio` transport; the server is launched as a child process. No port is needed.
 
 ### Prerequisites
 
 - macOS / Linux / Windows (WSL2)
 - [Python 3.12+](https://www.python.org/downloads/)
-- [uv](https://docs.astral.sh/uv/getting-started/installation/) — `curl -LsSf https://astral.sh/uv/install.sh | sh`
+- [uv](https://docs.astral.sh/uv/getting-started/installation/): `curl -LsSf https://astral.sh/uv/install.sh | sh`
 - [Claude Desktop](https://claude.ai/download)
 
-### Step 1 — Clone and install
+### Step 1: Clone and install
 
 ```bash
 git clone https://github.com/Jakolo121/german-newsfeed-mcp.git
@@ -144,14 +151,14 @@ cd german-newsfeed-mcp
 uv sync
 ```
 
-### Step 2 — Verify it works
+### Step 2: Verify it works
 
 ```bash
-uv run python -c "from german_newsfeed_mcp.server import mcp; print('OK —', mcp.name)"
-# Expected: OK — German Newsfeed MCP
+uv run python -c "from german_newsfeed_mcp.server import mcp; print('OK!', mcp.name)"
+# Expected: OK! German Newsfeed MCP
 ```
 
-### Step 3 — Connect Claude Desktop
+### Step 3: Connect Claude Desktop
 
 Open your Claude Desktop config file:
 
@@ -175,11 +182,11 @@ Add the following entry (adjust the path to your clone):
     },
 ```
 
-### Step 4 — Restart Claude Desktop
+### Step 4: Restart Claude Desktop
 
 Quit and reopen the application, or reload its MCP servers, depending on the application.
 
-### Step 5 — Try it!
+### Step 5: Try it!
 
 Ask your assistant:
 
@@ -195,7 +202,7 @@ the `streamable-http` transport is an option you choose deliberately.
 
 **Security note:** The HTTP transport has no authentication. Do not
 expose it publicly without an authentication layer in front (e.g. a
-reverse proxy) — the Compose setup therefore deliberately binds the port
+reverse proxy). The Compose setup therefore deliberately binds the port
 to `127.0.0.1` only. Whoever makes an instance reachable for third
 parties becomes the responsible operator under the
 [terms of use](#data-source-and-terms-of-use).
@@ -205,7 +212,7 @@ sessions, not to the rate limiter. The token bucket is process-local
 in-memory state. Two limitations follow:
 
 1. Multiple replicas against the same upstream API multiply the request
-   budget. This is not intended — run exactly one instance.
+   budget. This is not intended: run exactly one instance.
 2. A container restart resets the bucket to full. Combined with
    `restart: unless-stopped` and a crash loop, this can exceed the
    limit. Watch the logs.
@@ -217,14 +224,14 @@ in-memory state. Two limitations follow:
 - [Docker](https://docs.docker.com/get-docker/) 24+
 - [Docker Compose](https://docs.docker.com/compose/install/) v2+
 
-### Step 1 — Create your .env file
+### Step 1: Create your .env file
 
 ```bash
 cp .env.example .env
 # Edit .env if you want a different port or log level
 ```
 
-### Step 2 — Build and start
+### Step 2: Build and start
 
 ```bash
 docker compose up --build -d
@@ -239,7 +246,7 @@ make docker-run
 
 The server starts at `http://localhost:8000`.
 
-### Step 3 — Verify health
+### Step 3: Verify health
 
 ```bash
 docker compose logs german-newsfeed-mcp
@@ -252,7 +259,7 @@ Or:
 make docker-logs
 ```
 
-### Step 4 — Connect Claude Desktop (Streamable HTTP)
+### Step 4: Connect Claude Desktop (Streamable HTTP)
 
 ```json
     "german-newsfeed": {
@@ -314,7 +321,7 @@ Filter news by category.
 | `ressort` | str  | —       | `inland` `ausland` `wirtschaft` `sport` `video` `investigativ` `wissen` |
 | `limit`   | int  | 10      | Max items to return                                                     |
 
-> Ressort strings are automatically normalised to lowercase — `"Inland"`, `"INLAND"` and `"inland"` are all equivalent.
+> Ressort strings are automatically normalised to lowercase: `"Inland"`, `"INLAND"` and `"inland"` are all equivalent.
 
 ---
 
@@ -489,7 +496,7 @@ make clean         # remove __pycache__, .pytest_cache, dist, etc.
 ### Claude Desktop shows no MCP tools
 
 1. Check that the `claude_desktop_config.json` path is **absolute**
-2. Run `uv run python main.py` in the terminal — it should start without errors
+2. Run `uv run python main.py` in the terminal, it should start without errors
 3. Fully quit and reopen Claude Desktop (Cmd+Q, not just close window)
 
 ### Docker container exits immediately
@@ -508,7 +515,7 @@ Common causes: wrong `TRANSPORT` value (must be `streamable-http` in Docker), po
 
 ### API timeouts
 
-The upstream API occasionally rate-limits certain endpoints. This is normal — the server returns a descriptive error message rather than crashing. Retry after a few seconds.
+The upstream API occasionally rate-limits certain endpoints. This is normal, the server returns a descriptive error message rather than crashing. Retry after a few seconds.
 
 ### Rate-limit errors
 
@@ -527,6 +534,6 @@ uv run pytest           # always run via uv, not bare pytest
 
 Apache License 2.0.
 
-The delivered news items are content of the ARD broadcasters, subject to their rights and the terms of use of tagesschau.de — see [Data Source and Terms of Use](#data-source-and-terms-of-use).
+The delivered news items are content of the ARD broadcasters, subject to their rights and the terms of use of tagesschau.de, see [Data Source and Terms of Use](#data-source-and-terms-of-use).
 
 Thanks to **[AndreasFischer1985](https://github.com/AndreasFischer1985)**, the bund.dev community for documenting the API and above all to the journalists at the ARD broadcasters, whose work this project merely passes along.

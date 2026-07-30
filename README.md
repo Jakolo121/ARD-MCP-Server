@@ -2,6 +2,14 @@
 
 > **Disclaimer:** Dies ist ein inoffizielles Projekt. Es besteht keine Verbindung zu ARD, ARD-aktuell oder NDR; das Projekt wird von diesen weder betrieben noch unterstützt noch genehmigt. „ARD" und „tagesschau" sind Marken der jeweiligen Rechteinhaber und werden hier ausschließlich zur Beschreibung der angesprochenen Schnittstelle genannt.
 
+Dieses Projekt stellt lediglich eine Verbindung zwischen der
+öffentlichen Schnittstelle und einem MCP-fähigen KI-Assistenten her.
+Für die Schnittstelle selbst, ihren Betrieb und ihre Inhalte ist
+ARD-aktuell verantwortlich; dieses Projekt kann dazu keine Auskunft
+geben. Hinweise zum Projekt, insbesondere von Rechteinhabern, bitte
+als [GitHub-Issue](https://github.com/Jakolo121/german-newsfeed-mcp/issues).
+Auf begründete Hinweise wird zeitnah reagiert.
+
 > MCP-Server für die öffentliche Nachrichten-API von tagesschau.de.  
 > Ein produktionsreifer [Model Context Protocol (MCP)](https://modelcontextprotocol.io)-Server, der deinen KI-Assistenten mit aktuellen Nachrichten verbindet.
 
@@ -32,8 +40,7 @@ Sprache:
 11. [Tests](#tests)
 12. [Makefile-Referenz](#makefile-referenz)
 13. [Fehlerbehebung](#fehlerbehebung)
-14. [Kontakt](#kontakt)
-15. [Lizenz & Danksagung](#lizenz--danksagung)
+14. [Lizenz & Danksagung](#lizenz--danksagung)
 
 ---
 
@@ -129,7 +136,7 @@ german-newsfeed-mcp/
 
 ## Schnellstart Lokal (Claude Desktop)
 
-Gilt genauso für andere KI-Assistenten — dort die entsprechende Konfiguration bearbeiten. Der `stdio`-Transport startet den Server als Subprocess. Es muss kein Port angegeben werden.
+Gilt genauso für andere KI-Assistenten, dort die entsprechende Konfiguration bearbeiten. Der `stdio`-Transport startet den Server als Subprocess. Es muss kein Port angegeben werden.
 
 ### Voraussetzungen
 
@@ -197,7 +204,7 @@ der `streamable-http`-Transport ist eine bewusst zu wählende Option.
 
 **Sicherheitshinweis:** Der HTTP-Transport hat keine Authentifizierung.
 Nicht ohne vorgelagerte Authentifizierung (z. B. Reverse Proxy) öffentlich
-exponieren — das Compose-Setup bindet den Port deshalb bewusst nur an
+exponieren. Das Compose-Setup bindet den Port deshalb bewusst nur an
 `127.0.0.1`. Wer eine Instanz für Dritte erreichbar macht, wird zum
 verantwortlichen Betreiber im Sinne der
 [Nutzungsbedingungen](#datenquelle-und-nutzungsbedingungen).
@@ -207,7 +214,7 @@ MCP-Sessions, nicht auf den Rate Limiter. Der Token-Bucket ist
 prozesslokaler In-Memory-Zustand. Daraus folgen zwei Einschränkungen:
 
 1. Mehrere Replicas gegen dieselbe Upstream-API vervielfachen das
-   Anfragebudget. Das ist nicht vorgesehen — genau eine Instanz betreiben.
+   Anfragebudget. Das ist nicht vorgesehen: genau eine Instanz betreiben.
 2. Ein Container-Neustart setzt den Bucket auf voll zurück. In Kombination
    mit `restart: unless-stopped` und einem Crashloop kann das Limit dadurch
    überschritten werden. Logs beobachten.
@@ -316,7 +323,7 @@ Nach Kategorie filtern.
 | `ressort` | str | —        | `inland` `ausland` `wirtschaft` `sport` `video` `investigativ` `wissen` |
 | `limit`   | int | 10       | Maximale Ergebnisse                                                     |
 
-> Ressort-Strings werden automatisch zu Kleinbuchstaben normalisiert — `"Inland"`, `"INLAND"` und `"inland"` sind gleichwertig.
+> Ressort-Strings werden automatisch zu Kleinbuchstaben normalisiert: `"Inland"`, `"INLAND"` und `"inland"` sind gleichwertig.
 
 ---
 
@@ -531,6 +538,6 @@ uv run pytest
 
 Apache License 2.0.
 
-Die ausgelieferten Nachrichten sind Inhalte der ARD-Anstalten, unterliegen deren Rechten und den Nutzungsbedingungen von tagesschau.de — siehe [Datenquelle und Nutzungsbedingungen](#datenquelle-und-nutzungsbedingungen).
+Die ausgelieferten Nachrichten sind Inhalte der ARD-Anstalten, unterliegen deren Rechten und den Nutzungsbedingungen von tagesschau.de, siehe [Datenquelle und Nutzungsbedingungen](#datenquelle-und-nutzungsbedingungen).
 
 Danke an **[AndreasFischer1985](https://github.com/AndreasFischer1985)** , die bund.dev-Community für die Dokumentation der Schnittstelle und vor allem an die Journalist:innen der ARD-Anstalten, deren Arbeit dieses Projekt lediglich weiterreicht.
