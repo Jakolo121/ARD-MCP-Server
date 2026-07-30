@@ -1,0 +1,44 @@
+# =============================================================================
+# German Newsfeed MCP Server — CI
+#
+# test:           unit tests + lint on every push / PR to main (no network)
+# upstream-check: weekly live-integration run against the real api2u API.
+#                 Fails loudly when the upstream response format changes.
+#                 Weekly on purpose: four requests a month are negligible
+#                 against the 60/h budget.
+# =============================================================================
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "17 6 * * 1"
+  workflow_dispatch:
+
+jobs:
+  test:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Install dependencies
+        run: uv sync --extra dev
+      - name: Unit tests (no network)
+        run: uv run pytest tests/ -m "not integration" -q
+      - name: Lint
+        run: uv run pylint src/german_newsfeed_mcp/
+
+  upstream-check:
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Install dependencies
+        run: uv sync --extra dev
+      - name: Live integration tests against the real API
+        run: uv run pytest tests/ -m integration -q

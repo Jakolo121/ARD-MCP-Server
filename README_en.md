@@ -10,8 +10,16 @@ particular from rights holders, as a
 [GitHub issue](https://github.com/Jakolo121/german-newsfeed-mcp/issues).
 Substantiated concerns will be addressed promptly.
 
-> MCP server for the public news API of tagesschau.de.  
-> A production-ready [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server that brings live German news into your AI assistant.
+## In thirty seconds
+
+This [Model Context Protocol (MCP)](https://modelcontextprotocol.io) server
+connects your AI assistant (Claude Desktop and others) to the public news
+API of tagesschau.de: current headlines, category and regional news, and
+full-text search, locally via `stdio`, no API key required.
+
+Example: asked _"Was sind die aktuellen Schlagzeilen?"_, the assistant
+answers with the current top stories from tagesschau.de, each with title,
+date, summary, and a link to the article.
 
 ![pylint](https://img.shields.io/badge/pylint-9.97%2F10-brightgreen)
 ![tests](https://img.shields.io/badge/tests-181%20passed-brightgreen)
@@ -25,7 +33,8 @@ Language:
 
 ---
 
-## Table of Contents
+<details>
+<summary><strong>Table of Contents</strong></summary>
 
 1. [What is this?](#what-is-this)
 2. [Data Source and Terms of Use](#data-source-and-terms-of-use)
@@ -40,7 +49,10 @@ Language:
 11. [Running the Tests](#running-the-tests)
 12. [Makefile Reference](#makefile-reference)
 13. [Troubleshooting](#troubleshooting)
-14. [License & Acknowledgements](#license--acknowledgements)
+14. [When it stops working](#when-it-stops-working)
+15. [License & Acknowledgements](#license--acknowledgements)
+
+</details>
 
 ---
 
@@ -77,6 +89,18 @@ Applicable limits: at most 60 requests per hour, and no republication
 of the content except for offerings under a CC licence
 (https://tagesschau.de/creativecommons). Compliance is the
 responsibility of whoever operates a given instance.
+
+The robots.txt of tagesschau.de additionally declares an express
+reservation of rights under Section 44b(3) of the German Copyright Act
+(as of 2026-05-19): text and data mining and the automated use of the
+content for training or fine-tuning AI models are prohibited without
+written consent. Expressly exempt is automated access for the sole
+purpose of retrieval-augmented generation (RAG) or grounding, provided
+the technical directives of the robots.txt are complied with and the
+content remains attributed to its original source. This server falls
+under that exemption: it passes content to the assistant exclusively
+together with source links. The retrieved content must not be used to
+train AI models.
 
 ---
 
@@ -527,6 +551,22 @@ If the server reports "Rate limit exceeded", the local request budget (`RATE_LIM
 uv sync --extra dev     # ensure dev deps are installed
 uv run pytest           # always run via uv, not bare pytest
 ```
+
+---
+
+## When it stops working
+
+The upstream API is not officially documented and can change without
+notice. You can tell by the tools suddenly returning empty lists or
+error messages although tagesschau.de is reachable, and by the live
+integration tests failing (`uv run pytest tests/ -m integration`).
+
+All endpoints are defined in a single place: `ENDPOINTS` in
+`src/german_newsfeed_mcp/client.py`. API changes can be tracked there.
+
+The CI job `upstream-check` (`.github/workflows/ci.yml`) runs exactly
+these live tests weekly against the real API and fails loudly when the
+response format no longer matches.
 
 ---
 

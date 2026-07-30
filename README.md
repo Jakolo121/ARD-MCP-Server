@@ -1,3 +1,5 @@
+<!-- mcp-name: io.github.jakolo121/german-newsfeed-mcp -->
+
 # German Newsfeed MCP Server
 
 > **Disclaimer:** Dies ist ein inoffizielles Projekt. Es besteht keine Verbindung zu ARD, ARD-aktuell oder NDR; das Projekt wird von diesen weder betrieben noch unterstützt noch genehmigt. „ARD" und „tagesschau" sind Marken der jeweiligen Rechteinhaber und werden hier ausschließlich zur Beschreibung der angesprochenen Schnittstelle genannt.
@@ -10,8 +12,16 @@ geben. Hinweise zum Projekt, insbesondere von Rechteinhabern, bitte
 als [GitHub-Issue](https://github.com/Jakolo121/german-newsfeed-mcp/issues).
 Auf begründete Hinweise wird zeitnah reagiert.
 
-> MCP-Server für die öffentliche Nachrichten-API von tagesschau.de.  
-> Ein produktionsreifer [Model Context Protocol (MCP)](https://modelcontextprotocol.io)-Server, der deinen KI-Assistenten mit aktuellen Nachrichten verbindet.
+## In dreißig Sekunden
+
+Dieser [Model Context Protocol (MCP)](https://modelcontextprotocol.io)-Server
+verbindet deinen KI-Assistenten (Claude Desktop u. a.) mit der öffentlichen
+Nachrichten-API von tagesschau.de: aktuelle Schlagzeilen, Ressort- und
+Regionalnachrichten und Volltextsuche, lokal per `stdio`, ohne API-Schlüssel.
+
+Beispiel: Auf die Frage _„Was sind die aktuellen Schlagzeilen?"_ antwortet
+der Assistent mit den Top-Meldungen von tagesschau.de, jeweils mit Titel,
+Datum, Kurztext und Link zum Artikel.
 
 ![pylint](https://img.shields.io/badge/pylint-9.97%2F10-brightgreen)
 ![tests](https://img.shields.io/badge/tests-181%20passed-brightgreen)
@@ -25,7 +35,8 @@ Sprache:
 
 ---
 
-## Inhaltsverzeichnis
+<details>
+<summary><strong>Inhaltsverzeichnis</strong></summary>
 
 1. [Was ist dieses Projekt?](#was-ist-dieses-projekt)
 2. [Datenquelle und Nutzungsbedingungen](#datenquelle-und-nutzungsbedingungen)
@@ -40,7 +51,10 @@ Sprache:
 11. [Tests](#tests)
 12. [Makefile-Referenz](#makefile-referenz)
 13. [Fehlerbehebung](#fehlerbehebung)
-14. [Lizenz & Danksagung](#lizenz--danksagung)
+14. [Wenn es nicht mehr funktioniert](#wenn-es-nicht-mehr-funktioniert)
+15. [Lizenz & Danksagung](#lizenz--danksagung)
+
+</details>
 
 ---
 
@@ -79,6 +93,18 @@ Es gilt: maximal 60 Abrufe pro Stunde, keine Weiterveröffentlichung der
 Inhalte außer bei Angeboten unter CC-Lizenz
 (https://tagesschau.de/creativecommons). Die Einhaltung liegt beim
 Betreiber der jeweiligen Instanz.
+
+Die robots.txt von tagesschau.de erklärt zudem einen ausdrücklichen
+Nutzungsvorbehalt nach § 44b Abs. 3 UrhG (Stand: 19.05.2026): Text- und
+Data-Mining sowie die automatisierte Nutzung der Inhalte zum Training
+oder Fine-Tuning von KI-Modellen sind ohne schriftliche Zustimmung
+untersagt. Ausdrücklich ausgenommen ist der automatisierte Abruf allein
+zum Zweck von Retrieval-Augmented Generation (RAG) bzw. Grounding,
+sofern die technischen Vorgaben der robots.txt eingehalten werden und
+die Inhalte ihrer Originalquelle zugeordnet bleiben. Dieser Server
+fällt in diese Ausnahme: Er reicht Inhalte ausschließlich mit
+Quellenlinks an den Assistenten durch. Die abgerufenen Inhalte dürfen
+nicht zum Training von KI-Modellen verwendet werden.
 
 ---
 
@@ -531,6 +557,24 @@ uv run pytest
 ```
 
 (Nicht bare `pytest` verwenden)
+
+---
+
+## Wenn es nicht mehr funktioniert
+
+Die Upstream-API ist nicht offiziell dokumentiert und kann sich ohne
+Ankündigung ändern. Erkennbar ist das daran, dass die Tools plötzlich
+leere Listen oder Fehlermeldungen liefern, obwohl tagesschau.de
+erreichbar ist, und dass die Live-Integrationstests fehlschlagen
+(`uv run pytest tests/ -m integration`).
+
+Alle Endpunkte sind an einer einzigen Stelle definiert: `ENDPOINTS` in
+`src/german_newsfeed_mcp/client.py`. Änderungen der API lassen sich dort
+nachziehen.
+
+Der CI-Job `upstream-check` (`.github/workflows/ci.yml`) führt genau
+diese Live-Tests wöchentlich gegen die echte API aus und schlägt laut
+fehl, wenn das Antwortformat nicht mehr passt.
 
 ---
 
