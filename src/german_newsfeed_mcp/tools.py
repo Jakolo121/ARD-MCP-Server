@@ -14,8 +14,14 @@ import logging
 from typing import Optional
 
 from german_newsfeed_mcp.client import ENDPOINTS, NewsApiClient
-from german_newsfeed_mcp.formatters import _format_streams, format_channels, format_news_list
-from german_newsfeed_mcp.validators import VALID_REGION_IDS, VALID_RESSORTS, normalise_ressort, validate_ressort
+from german_newsfeed_mcp.formatters import (_format_streams,
+                                            format_channels,
+                                            format_news_list)
+
+from german_newsfeed_mcp.validators import (VALID_REGION_IDS,
+                                            VALID_RESSORTS,
+                                            normalise_ressort,
+                                            validate_ressort)
 
 # VALID_RESSORTS is re-exported so tests can import it from german_newsfeed_mcp.tools
 __all__ = ["VALID_RESSORTS", "VALID_REGION_IDS", "validate_ressort"]
