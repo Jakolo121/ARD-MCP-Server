@@ -243,7 +243,7 @@ sessions, not to the rate limiter. The token bucket is process-local
 in-memory state. Two limitations follow:
 
 1. Multiple replicas against the same upstream API multiply the request
-   budget. This is not intended: run exactly one instance.
+   budget.
 2. A container restart resets the bucket to full. Combined with
    `restart: unless-stopped` and a crash loop, this can exceed the
    limit. Watch the logs.

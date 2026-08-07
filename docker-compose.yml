@@ -40,6 +40,14 @@ services:
 
     # Resource limits — adjust for your host
     deploy:
+      # Hard-pinned to 1. The rate limiter (rate_limiter.py) is an in-memory
+      # token bucket, local to this single process. It is NOT shared across
+      # replicas or persisted across restarts. Running more than one replica
+      # multiplies the effective request budget against the upstream API and
+      # silently breaks the 60/h contract documented in the README. Do not
+      # raise this without first moving the limiter to shared state (e.g.
+      # Redis)
+      replicas: 1
       resources:
         limits:
           cpus: "0.5"

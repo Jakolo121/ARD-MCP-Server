@@ -250,7 +250,7 @@ MCP-Sessions, nicht auf den Rate Limiter. Der Token-Bucket ist
 prozesslokaler In-Memory-Zustand. Daraus folgen zwei Einschränkungen:
 
 1. Mehrere Replicas gegen dieselbe Upstream-API vervielfachen das
-   Anfragebudget. Das ist nicht vorgesehen: genau eine Instanz betreiben.
+   Anfragebudget.
 2. Ein Container-Neustart setzt den Bucket auf voll zurück. In Kombination
    mit `restart: unless-stopped` und einem Crashloop kann das Limit dadurch
    überschritten werden. Logs beobachten.
