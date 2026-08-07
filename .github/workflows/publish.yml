@@ -1,0 +1,72 @@
+# =============================================================================
+# Publish to PyPI
+#
+# No test/lint step here on purpose: a release tag is always set on a main
+# commit that has already run through ci.yml's test job on the preceding
+# push. Re-running the same suite here would just duplicate CI minutes.
+# Instead, check-ci below looks up that commit's most recent "CI" run via
+# the GitHub API and only lets build/publish proceed if it succeeded.
+# =============================================================================
+name: Publish to PyPI
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  check-ci:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+    outputs:
+      ci_success: ${{ steps.check.outputs.success }}
+    steps:
+      - name: Check CI status for tagged commit
+        id: check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data } = await github.rest.actions.listWorkflowRuns({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: "ci.yml",
+              head_sha: context.sha,
+            });
+            const success = data.workflow_runs.some(run => run.conclusion === "success");
+            core.setOutput("success", success);
+
+  build:
+    needs: check-ci
+    if: needs.check-ci.outputs.ci_success == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Build package
+        run: uv build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write  # Pflicht fuer OIDC Trusted Publishing, kein PyPI-Token noetig
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1

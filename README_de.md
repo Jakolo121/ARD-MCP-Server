@@ -1,0 +1,597 @@
+<!-- mcp-name: io.github.jakolo121/german-newsfeed-mcp -->
+
+![pylint](https://img.shields.io/badge/pylint-9.97%2F10-brightgreen)
+![tests](https://img.shields.io/badge/tests-181%20passed-brightgreen)
+![python](https://img.shields.io/badge/python-3.12%2B-blue)
+![license](https://img.shields.io/badge/license-Apache%202.0-blue)
+
+# German Newsfeed MCP Server
+
+> **Disclaimer:** Dies ist ein privates, inoffizielles Projekt. Es ist kein
+> Angebot der ARD und wird von ARD, ARD-aktuell oder NDR weder betrieben
+> noch unterstützt. Es entsteht unabhängig von jeder
+> beruflichen Tätigkeit der Autorin. „ARD" und „tagesschau" sind Marken der
+> jeweiligen Rechteinhaber und werden hier ausschließlich zur Beschreibung
+> der angesprochenen Schnittstelle genannt.
+
+> Dieses Projekt stellt lediglich eine Verbindung zwischen der
+> öffentlichen Schnittstelle und einem MCP-fähigen KI-Assistenten her.
+> Für die Schnittstelle selbst, ihren Betrieb und ihre Inhalte ist
+> die ARD verantwortlich; dieses Projekt kann dazu keine Auskunft
+> geben. Hinweise zum Projekt, insbesondere von Rechteinhabern, bitte
+> als [GitHub-Issue](https://github.com/Jakolo121/german-newsfeed-mcp/issues).
+> Auf begründete Hinweise wird zeitnah reagiert.
+
+## In dreißig Sekunden
+
+Dieser [Model Context Protocol (MCP)](https://modelcontextprotocol.io)-Server
+verbindet deinen KI-Assistenten (Claude Desktop u. a.) mit der öffentlichen
+Nachrichten-API von tagesschau.de: aktuelle Schlagzeilen, Ressort- und
+Regionalnachrichten und Volltextsuche, lokal per `stdio`, ohne API-Schlüssel.
+
+Beispiel: Auf die Frage _„Was sind die aktuellen Schlagzeilen?"_ antwortet
+der Assistent mit den Top-Meldungen von tagesschau.de, jeweils mit Titel,
+Datum, Kurztext und Link zum Artikel.
+
+![pylint](https://img.shields.io/badge/pylint-9.97%2F10-brightgreen)
+![tests](https://img.shields.io/badge/tests-181%20passed-brightgreen)
+![python](https://img.shields.io/badge/python-3.12%2B-blue)
+![license](https://img.shields.io/badge/license-Apache%202.0-blue)
+
+Sprache:
+
+- 🇩🇪 Deutsch
+- 🇬🇧 [English](README_en.md)
+
+---
+
+<details>
+<summary><strong>Inhaltsverzeichnis</strong></summary>
+
+1. [Was ist dieses Projekt?](#was-ist-dieses-projekt)
+2. [Datenquelle und Nutzungsbedingungen](#datenquelle-und-nutzungsbedingungen)
+3. [Features](#features)
+4. [Projektstruktur](#projektstruktur)
+5. [Schnellstart Lokal (Claude Desktop)](#schnellstart-lokal-claude-desktop)
+6. [Remote / Docker-Deployment](#remote--docker-deployment)
+7. [Konfigurationsreferenz](#konfigurationsreferenz)
+8. [Verfügbare Tools](#verfügbare-tools)
+9. [Verfügbare Ressourcen](#verfügbare-ressourcen)
+10. [Entwicklung](#entwicklung)
+11. [Tests](#tests)
+12. [Makefile-Referenz](#makefile-referenz)
+13. [Fehlerbehebung](#fehlerbehebung)
+14. [Wenn es nicht mehr funktioniert](#wenn-es-nicht-mehr-funktioniert)
+15. [Lizenz & Danksagung](#lizenz--danksagung)
+
+</details>
+
+---
+
+## Was ist dieses Projekt?
+
+Dieser MCP-Server verbindet die öffentliche Nachrichten-API von tagesschau.de mit deinem KI-Assistenten (Claude, Open Claw u.a.).
+
+Sobald verbunden, kann der Assistent z.B folgende Anfragen beantworten:
+
+- _„Was sind die aktuellen Schlagzeilen?"_
+- _„Zeig mir die neuesten Wirtschaftsnachrichten."_
+- _„Suche nach Artikeln über Ukraine."_
+- _„Welche Regionalnachrichten gibt es aus Bayern?"_
+
+Details zur Schnittstelle und ihren Bedingungen: siehe [Datenquelle und Nutzungsbedingungen](#datenquelle-und-nutzungsbedingungen). Es wird kein API-Schlüssel benötigt.
+
+---
+
+## Datenquelle und Nutzungsbedingungen
+
+Dieser Server ruft die öffentlich erreichbare Schnittstelle
+`www.tagesschau.de/api2u/` auf. Betrieben wird sie von ARD-aktuell. Die
+ausgelieferten Inhalte stammen von den ARD-Anstalten, unterliegen deren
+Rechten und den Nutzungsbedingungen von tagesschau.de:
+https://www.tagesschau.de/nutzungsbedingungen/
+
+Die Schnittstelle ist nicht offiziell dokumentiert. Eine
+Community-Dokumentation liegt bei bund.dev vor
+(https://tagesschau.api.bund.dev). bund.dev ist ein
+zivilgesellschaftliches Dokumentationsprojekt, weder Betreiber der
+Schnittstelle noch Rechteinhaber an den Inhalten. Die Dokumentation war
+für dieses Projekt eine Orientierungshilfe, begründet aber keine
+Nutzungsrechte.
+
+Es gilt: maximal 60 Abrufe pro Stunde, keine Weiterveröffentlichung der
+Inhalte außer bei Angeboten unter CC-Lizenz
+(https://tagesschau.de/creativecommons). Die Einhaltung liegt beim
+Betreiber der jeweiligen Instanz.
+
+Die robots.txt von tagesschau.de erklärt zudem einen ausdrücklichen
+Nutzungsvorbehalt nach § 44b Abs. 3 UrhG (Stand: 19.05.2026): Text- und
+Data-Mining sowie die automatisierte Nutzung der Inhalte zum Training
+oder Fine-Tuning von KI-Modellen sind ohne schriftliche Zustimmung
+untersagt. Ausdrücklich ausgenommen ist der automatisierte Abruf allein
+zum Zweck von Retrieval-Augmented Generation (RAG) bzw. Grounding,
+sofern die technischen Vorgaben der robots.txt eingehalten werden und
+die Inhalte ihrer Originalquelle zugeordnet bleiben. Dieser Server
+fällt in diese Ausnahme: Er reicht Inhalte ausschließlich mit
+Quellenlinks an den Assistenten durch. Die abgerufenen Inhalte dürfen
+nicht zum Training von KI-Modellen verwendet werden.
+
+---
+
+## Features
+
+|                      |                                                           |
+| -------------------- | --------------------------------------------------------- |
+| **Live-Nachrichten** | Aktuelle Meldungen, kategorisiert, regional, in Echtzeit  |
+| **Volltextsuche**    | Über alle verfügbaren Artikel                             |
+| **Livestreams**      | Alle verfügbaren Kanäle mit HLS-URLs                      |
+| **Rate Limiter**     | Lokaler Token-Bucket, hält das 60/h-Limit der API ein     |
+| **Dual-Transport**   | `stdio` lokal; `streamable-http` für Remote und Docker    |
+| **Docker**           | Multi-Stage-Build, Nicht-Root-User, Health-Checks, Limits |
+| **181 Tests**        | 160 Unit-Tests + 21 Live-Integrationstests                |
+| **Makefile**         | `make test`, `make lint`, `make docker-build`             |
+| **Keine Secrets**    | Öffentliche API, kein API-Schlüssel nötig                 |
+
+---
+
+## Projektstruktur
+
+```
+german-newsfeed-mcp/
+├── src/
+│   └── german_newsfeed_mcp/
+│       ├── __init__.py      # Paket-Metadaten
+│       ├── config.py        # Umgebungsvariablen
+│       ├── client.py        # Async HTTP (httpx) + Fehlerbehandlung
+│       ├── rate_limiter.py  # Token-Bucket-Rate-Limiter
+│       ├── validators.py    # Validierung
+│       ├── formatters.py    # Markdown-Output
+│       ├── tools.py         # MCP-Tool-Logik
+│       ├── resources.py     # MCP-Ressourcen-Logik
+│       └── server.py        # Composition Root: FastMCP + run()
+├── tests/
+│   ├── conftest.py          # Fixtures, Mock-Daten
+│   ├── test_client.py       # Client-Tests
+│   ├── test_rate_limiter.py # Rate-Limiter-Tests
+│   ├── test_formatters.py   # Formatter-Tests
+│   ├── test_tools.py        # Tool-Tests
+│   └── test_resources.py    # Ressourcen-Tests
+├── main.py                  # Einstiegspunkt
+├── pyproject.toml           # Abhängigkeiten, Config
+├── uv.lock                  # Dependency-Lock
+├── Dockerfile               # Produktions-Image
+├── docker-compose.yml       # Docker-Deployment
+├── .env.example             # Konfigurationsvorlage
+├── Makefile                 # Entwickler-Tools
+├── CHANGELOG.md             # Versionshistorie
+├── CONTRIBUTING.md          # Beiträge
+└── README.md                # Diese Datei
+```
+
+---
+
+## Schnellstart Lokal (Claude Desktop)
+
+Gilt genauso für andere KI-Assistenten, dort die entsprechende Konfiguration bearbeiten. Der `stdio`-Transport startet den Server als Subprocess. Es muss kein Port angegeben werden.
+
+### Voraussetzungen
+
+- macOS / Linux / Windows (WSL2)
+- [Python 3.12+](https://www.python.org/downloads/)
+- [uv](https://docs.astral.sh/uv/getting-started/installation/)
+- [Claude Desktop](https://claude.ai/download)
+
+### Schritt 1: Repository klonen und Projekt installieren
+
+```bash
+git clone https://github.com/Jakolo121/german-newsfeed-mcp.git
+cd german-newsfeed-mcp
+uv sync
+```
+
+### Schritt 2: Funktionscheck
+
+```bash
+uv run python -c "from german_newsfeed_mcp.server import mcp; print('OK!', mcp.name)"
+# Erwartete Ausgabe: OK! German Newsfeed MCP
+```
+
+### Schritt 3: Claude Desktop oder anderen Assistenten konfigurieren
+
+Öffne die Claude-Konfigurationsdatei:
+
+| Betriebssystem | Pfad                                                              |
+| -------------- | ----------------------------------------------------------------- |
+| macOS          | `~/Library/Application Support/Claude/claude_desktop_config.json` |
+| Windows        | `%APPDATA%\Claude\claude_desktop_config.json`                     |
+| Linux          | `~/.config/Claude/claude_desktop_config.json`                     |
+
+Eintrag hinzufügen (Pfad anpassen):
+
+```json
+    "german-newsfeed": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/absoluter/pfad/zu/german-newsfeed-mcp",
+        "run",
+        "german-newsfeed-mcp"
+      ]
+    },
+```
+
+### Schritt 4: Application neu starten
+
+Die Application neustarten oder die MCP-Server neu laden, je nach Application
+
+### Schritt 5: Test
+
+Frage KI-Assistenten:
+
+> _„Was sind die aktuellen Nachrichten?"_
+
+---
+
+## Remote / Docker-Deployment
+
+Self-Hosting für die eigene oder teaminterne Nutzung. Der empfohlene
+Standardweg ist `stdio` (siehe [Schnellstart](#schnellstart-lokal-claude-desktop));
+der `streamable-http`-Transport ist eine bewusst zu wählende Option.
+
+**Sicherheitshinweis:** Der HTTP-Transport hat keine Authentifizierung.
+Nicht ohne vorgelagerte Authentifizierung (z. B. Reverse Proxy) öffentlich
+exponieren. Das Compose-Setup bindet den Port deshalb bewusst nur an
+`127.0.0.1`. Wer eine Instanz für Dritte erreichbar macht, wird zum
+verantwortlichen Betreiber im Sinne der
+[Nutzungsbedingungen](#datenquelle-und-nutzungsbedingungen).
+
+**Grenzen des Rate Limiters:** `stateless_http=True` bezieht sich auf
+MCP-Sessions, nicht auf den Rate Limiter. Der Token-Bucket ist
+prozesslokaler In-Memory-Zustand. Daraus folgen zwei Einschränkungen:
+
+1. Mehrere Replicas gegen dieselbe Upstream-API vervielfachen das
+   Anfragebudget. Das ist nicht vorgesehen: genau eine Instanz betreiben.
+2. Ein Container-Neustart setzt den Bucket auf voll zurück. In Kombination
+   mit `restart: unless-stopped` und einem Crashloop kann das Limit dadurch
+   überschritten werden. Logs beobachten.
+
+(Der Legacy-Transport `sse` wird weiterhin unterstützt.)
+
+### Voraussetzungen
+
+- [Docker](https://docs.docker.com/get-docker/) 24+
+- [Docker Compose](https://docs.docker.com/compose/install/) v2+
+
+### Schritt 1: .env erstellen/kopieren
+
+```bash
+cp .env.example .env
+# Bei Bedarf editieren (Port, Log-Level etc.)
+```
+
+### Schritt 2: Bauen und starten
+
+```bash
+docker compose up --build -d
+```
+
+Oder:
+
+```bash
+make docker-build
+make docker-run
+```
+
+Der Server läuft auf `http://localhost:8000`.
+
+### Schritt 3: Status prüfen
+
+```bash
+docker compose logs german-newsfeed-mcp
+docker compose ps
+```
+
+Oder:
+
+```bash
+make docker-logs
+```
+
+### Schritt 4: Claude Desktop anpassen (Streamable HTTP)
+
+```json
+    "german-newsfeed": {
+      "command": "npx",
+      "args": ["mcp-remote", "http://localhost:8000/mcp"]
+    },
+```
+
+Für externe Server: erst eine Authentifizierung vorschalten (siehe Sicherheitshinweis oben), dann das Loopback-Binding in `docker-compose.yml` anpassen und `localhost` durch die Adresse des Proxys ersetzen.
+
+### Stoppen / Aktualisieren
+
+```bash
+docker compose down
+docker compose up --build -d
+```
+
+---
+
+## Konfigurationsreferenz
+
+Alle Einstellungen kommen aus Umgebungsvariablen oder `.env`.
+
+| Variable              | Standard  | Beschreibung                                                               |
+| --------------------- | --------- | -------------------------------------------------------------------------- |
+| `TRANSPORT`           | `stdio`   | `stdio` oder `streamable-http` (`sse` legacy)                              |
+| `HOST`                | `0.0.0.0` | Bind-Adresse (nur HTTP-Transporte)                                         |
+| `PORT`                | `4200`    | HTTP-Port (nur HTTP-Transporte)                                            |
+| `LOG_LEVEL`           | `INFO`    | DEBUG, INFO, WARNING, ERROR                                                |
+| `RATE_LIMIT_PER_HOUR` | `60`      | Lokales Anfragelimit pro Stunde gegenüber der Upstream-API                 |
+| `USER_AGENT_CONTACT`  | —         | Optional: Kontaktangabe im User-Agent-Header; entfällt, wenn nicht gesetzt |
+
+Die Standardwerte gelten für den direkten Start (`uv run german-newsfeed-mcp`).
+Das Compose-Setup überschreibt sie: dort werden `HOST=0.0.0.0` und `PORT=8000`
+gesetzt (siehe `docker-compose.yml`).
+
+---
+
+## Verfügbare Tools
+
+Dein Assistent kann diese aufrufen.
+
+### `get_latest_news`
+
+Top-Meldungen abrufen.
+
+| Parameter | Typ | Standard | Beschreibung        |
+| --------- | --- | -------- | ------------------- |
+| `limit`   | int | 10       | Maximale Ergebnisse |
+
+---
+
+### `get_news_by_ressort`
+
+Nach Kategorie filtern.
+
+| Parameter | Typ | Standard | Beschreibung                                                            |
+| --------- | --- | -------- | ----------------------------------------------------------------------- |
+| `ressort` | str | —        | `inland` `ausland` `wirtschaft` `sport` `video` `investigativ` `wissen` |
+| `limit`   | int | 10       | Maximale Ergebnisse                                                     |
+
+> Ressort-Strings werden automatisch zu Kleinbuchstaben normalisiert: `"Inland"`, `"INLAND"` und `"inland"` sind gleichwertig.
+
+---
+
+### `get_regional_news`
+
+Regionalnachrichten.
+
+| Parameter   | Typ | Standard | Beschreibung                                                                                                           |
+| ----------- | --- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `region_id` | int | —        | 1=BW · 2=BY · 3=BE · 4=BB · 5=HB · 6=HH · 7=HE · 8=MV · 9=NI · 10=NRW · 11=RLP · 12=SL · 13=SN · 14=ST · 15=SH · 16=TH |
+| `ressort`   | str | None     | Optionaler Kategorie-Filter                                                                                            |
+| `limit`     | int | 10       | Maximale Ergebnisse                                                                                                    |
+
+---
+
+### `search_news`
+
+Volltextsuche.
+
+| Parameter     | Typ | Standard | Beschreibung                  |
+| ------------- | --- | -------- | ----------------------------- |
+| `search_text` | str | —        | Suchanfrage                   |
+| `page_size`   | int | 10       | Ergebnisse pro Seite (max 30) |
+| `result_page` | int | 0        | Seitenversatz (0-basiert)     |
+
+---
+
+### `get_channels`
+
+Live-Kanäle mit Stream-URLs.
+
+_(Keine Parameter)_
+
+---
+
+## Verfügbare Ressourcen
+
+URIs, die MCP-Clients lesen können.
+
+| URI                                      | Beschreibung               |
+| ---------------------------------------- | -------------------------- |
+| `news://tagesschau/homepage`             | Top-Meldungen              |
+| `news://tagesschau/news/{ressort}`       | Nachrichten nach Kategorie |
+| `news://tagesschau/regional/{region_id}` | Regionalnachrichten        |
+| `news://tagesschau/search/{search_text}` | Suchergebnisse             |
+| `news://tagesschau/channels`             | Kanäle & Streams           |
+
+---
+
+## Entwicklung
+
+### Setup
+
+```bash
+git clone https://github.com/Jakolo121/german-newsfeed-mcp.git
+cd german-newsfeed-mcp
+uv sync --extra dev
+```
+
+Server starten:
+
+```bash
+uv run german-newsfeed-mcp
+```
+
+Oder:
+
+```bash
+make run
+```
+
+### Code-Struktur (SOLID)
+
+Jedes Modul hat eine Aufgabe:
+
+| Modul             | Aufgabe                                        |
+| ----------------- | ---------------------------------------------- |
+| `config.py`       | Umgebungsvariablen lesen                       |
+| `client.py`       | HTTP + Fehlerbehandlung                        |
+| `rate_limiter.py` | Lokales Anfragelimit (Token-Bucket)            |
+| `validators.py`   | Eingabevalidierung                             |
+| `formatters.py`   | API-Dicts zu Markdown                          |
+| `tools.py`        | Tool-Logik (validieren, aufrufen, formatieren) |
+| `resources.py`    | Ressourcen-Logik                               |
+| `server.py`       | Composition Root, FastMCP, Handler, Startup    |
+
+### Neues Tool
+
+1. Funktion in `tools.py` hinzufügen
+2. Mit `@mcp.tool()` in `server.py` registrieren
+3. Tests in `tests/test_tools.py` schreiben
+
+---
+
+## Tests
+
+### Unit-Tests (schnell, kein Netz)
+
+```bash
+uv run pytest -m "not integration"
+uv run pytest -m "not integration" -v
+uv run pytest tests/test_formatters.py
+```
+
+Oder:
+
+```bash
+make test
+```
+
+### Live-Tests (braucht Internet)
+
+```bash
+uv run pytest -m integration
+uv run pytest -m integration -v
+```
+
+### Alle Tests
+
+```bash
+uv run pytest
+```
+
+Oder:
+
+```bash
+make test-all
+```
+
+### Qualität checken (Lint + Tests)
+
+```bash
+uv run pylint src/german_newsfeed_mcp/
+uv run pytest
+```
+
+Oder:
+
+```bash
+make check
+```
+
+### Erwartete Ergebnisse
+
+```
+160 passed            ← Unit-Tests
+ 21 selected          ← Integrationstests
+```
+
+---
+
+## Makefile-Referenz
+
+```bash
+make test          # Unit-Tests (~0,3 s)
+make test-all      # Unit- + Integrationstests
+make lint          # pylint
+make check         # lint + Tests (für CI)
+make run           # stdio-Server
+make run-http      # HTTP-Server
+make docker-build  # Docker bauen
+make docker-run    # docker compose up
+make docker-stop   # docker compose down
+make docker-logs   # Logs folgen
+make clean         # __pycache__ etc. löschen
+```
+
+---
+
+## Fehlerbehebung
+
+### Claude Desktop zeigt keine Tools
+
+1. Pfad in `claude_desktop_config.json` ist absolut?
+2. `uv run python main.py` startet fehlerlos?
+3. Claude komplett beenden, neu öffnen (Cmd+Q, nicht einfach fenster schließen)
+
+### Docker-Container beendet sich sofort
+
+```bash
+docker compose logs german-newsfeed-mcp
+```
+
+Oder:
+
+```bash
+make docker-logs
+```
+
+Häufig: falscher `TRANSPORT` (in Docker muss es `streamable-http` sein), oder Port belegt.
+
+### API-Timeouts
+
+Die Upstream-API limitiert manchmal. Das ist normal, der Server meldet einen Fehler, statt abzustürzen. Später nochmal versuchen.
+
+### Rate-Limit-Fehler
+
+Meldet der Server „Rate limit exceeded", ist das lokale Anfragebudget (`RATE_LIMIT_PER_HOUR`, Standard 60/h) aufgebraucht. Es wurde kein Request an die API gesendet. Später erneut versuchen.
+
+### Import-Fehler bei Tests
+
+```bash
+uv sync --extra dev
+uv run pytest
+```
+
+(Nicht bare `pytest` verwenden)
+
+---
+
+## Wenn es nicht mehr funktioniert
+
+Die Upstream-API ist nicht offiziell dokumentiert und kann sich ohne
+Ankündigung ändern. Erkennbar ist das daran, dass die Tools plötzlich
+leere Listen oder Fehlermeldungen liefern, obwohl tagesschau.de
+erreichbar ist, und dass die Live-Integrationstests fehlschlagen
+(`uv run pytest tests/ -m integration`).
+
+Alle Endpunkte sind an einer einzigen Stelle definiert: `ENDPOINTS` in
+`src/german_newsfeed_mcp/client.py`. Änderungen der API lassen sich dort
+nachziehen.
+
+Der CI-Job `upstream-check` (`.github/workflows/ci.yml`) führt genau
+diese Live-Tests wöchentlich gegen die echte API aus und schlägt laut
+fehl, wenn das Antwortformat nicht mehr passt.
+
+---
+
+## Lizenz & Danksagung
+
+Apache License 2.0.
+
+Die ausgelieferten Nachrichten sind Inhalte der ARD-Anstalten, unterliegen deren Rechten und den Nutzungsbedingungen von tagesschau.de, siehe [Datenquelle und Nutzungsbedingungen](#datenquelle-und-nutzungsbedingungen).
+
+Danke an **[AndreasFischer1985](https://github.com/AndreasFischer1985)** , die bund.dev-Community für die Dokumentation der Schnittstelle und vor allem an die Journalist:innen der ARD-Anstalten, deren Arbeit dieses Projekt lediglich weiterreicht.
