@@ -24,7 +24,7 @@ jobs:
     steps:
       - name: Check CI status for tagged commit
         id: check
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const { data } = await github.rest.actions.listWorkflowRuns({
