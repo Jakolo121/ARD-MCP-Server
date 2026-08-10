@@ -60,7 +60,7 @@ docker-logs:
 # Release
 # ---------------------------------------------------------------------------
 
-# Bumps version in pyproject.toml + server.json. Usage: make release VERSION=2.1.0
+# Bumps version in pyproject.toml + server.json. Usage: make release VERSION=x.y.z
 release:
 	@if [ -z "$(VERSION)" ]; then echo "Usage: make release VERSION=x.y.z"; exit 1; fi
 	uv run scripts/bump_version.py $(VERSION)
