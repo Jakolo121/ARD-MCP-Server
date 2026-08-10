@@ -14,7 +14,7 @@
 #   make clean         — remove build artefacts and caches
 # =============================================================================
 
-.PHONY: test test-all lint check run run-http docker-build docker-run docker-stop clean help
+.PHONY: test test-all lint check run run-http docker-build docker-run docker-stop clean release help
 
 # ---------------------------------------------------------------------------
 # Local development
@@ -57,6 +57,15 @@ docker-logs:
 	docker compose logs -f german-newsfeed-mcp
 
 # ---------------------------------------------------------------------------
+# Release
+# ---------------------------------------------------------------------------
+
+# Bumps version in pyproject.toml + server.json. Usage: make release VERSION=2.1.0
+release:
+	@if [ -z "$(VERSION)" ]; then echo "Usage: make release VERSION=x.y.z"; exit 1; fi
+	uv run scripts/bump_version.py $(VERSION)
+
+# ---------------------------------------------------------------------------
 # Cleanup
 # ---------------------------------------------------------------------------
 
@@ -86,4 +95,5 @@ help:
 	@echo "  docker-stop   Stop Docker Compose services"
 	@echo "  docker-logs   Tail Docker Compose logs"
 	@echo "  clean         Remove build artefacts and caches"
+	@echo "  release       Bump version in pyproject.toml + server.json (VERSION=x.y.z)"
 	@echo ""
