@@ -1,6 +1,6 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
-  "name": "io.github.jakolo121/german-newsfeed-mcp",
+  "name": "io.github.Jakolo121/german-newsfeed-mcp",
   "title": "German Newsfeed MCP Server",
   "description": "MCP server for the public news API of tagesschau.de, including regional news from ARD broadcasters",
   "repository": {
