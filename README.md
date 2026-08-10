@@ -1,6 +1,6 @@
 # German Newsfeed MCP Server
 
-<!-- mcp-name: io.github.jakolo121/german-newsfeed-mcp -->
+<!-- mcp-name: io.github.Jakolo121/german-newsfeed-mcp -->
 
 ![pylint](https://img.shields.io/badge/pylint-9.97%2F10-brightgreen)
 ![tests](https://img.shields.io/badge/tests-181%20passed-brightgreen)
