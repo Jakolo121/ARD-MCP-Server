@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [2.1.0] — 2026-08-21
+
+### Added
+
+- **`get_article(url)`** — returns the full text of a single article on demand; it takes the link now printed with every news item and costs exactly one upstream request per call
+- Every news item now renders a `🔗 Volltext:` link, and regional items additionally a `📰 Quelle:` line naming the originating ARD state broadcaster
+
+### Changed
+
+- Article HTML is stripped to plain text before it is handed to the assistant
+- News-endpoint items now render their teaser sentence instead of just a headline
+
+### Fixed
+
+- Tool descriptions now state which field set each tool returns — `get_latest_news` delivers the full article text, while `get_news_by_ressort`, `get_regional_news` deliver metadata only (title, topline, date, teaser sentence), and `search_news` delivers title, date and article type
+- Removed the incorrect claim of a 50-item upstream maximum — the news endpoint exposes no page-size parameter and decides the response size itself
+- Empty or whitespace-only `search_text` is rejected with a clear message instead of leaking a raw upstream HTTP 400
+- A negative `limit` now reports the value that was actually passed instead of always saying `limit=0`
+
+### Security
+
+- `get_article` never fetches an arbitrary URL. The supplied link is validated and reduced to a relative path under `/api2u/`, which is then requested from the configured API base URL, so requests to other hosts are structurally impossible.
+
+---
+
 ## [1.0.0] — 2026-04-09
 
 ### Added
@@ -45,5 +70,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Environment-variable-driven configuration (`config.py`)
 - `httpx`-based async HTTP client with structured error handling
 
+[2.1.0]: https://github.com/Jakolo121/german-newsfeed-mcp/compare/v2.0.2...v2.1.0
 [1.0.0]: https://github.com/Jakolo121/german-newsfeed-mcp/compare/v0.1.0...v1.0.0
 [0.1.0]: https://github.com/Jakolo121/german-newsfeed-mcp/releases/tag/v0.1.0

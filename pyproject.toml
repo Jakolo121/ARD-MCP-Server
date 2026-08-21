@@ -1,6 +1,6 @@
 [project]
 name = "german-newsfeed-mcp"
-version = "2.0.2"
+version = "2.1.0"
 description = "Unofficial, independent MCP client for tagesschau.de's public news API (not affiliated with ARD/NDR)"
 readme = "README.md"
 license = "Apache-2.0"

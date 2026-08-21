@@ -8,14 +8,21 @@ Section B: Integration tests against the real Tagesschau API.
 
 import pytest
 
+from german_newsfeed_mcp.client import ENDPOINTS
 from german_newsfeed_mcp.tools import (
+    tool_get_article,
     tool_get_channels,
     tool_get_latest_news,
     tool_get_news_by_ressort,
     tool_get_regional_news,
     tool_search_news,
 )
-from tests.conftest import FakeNewsApi
+from tests.conftest import (
+    SAMPLE_ARTICLE_DETAILS,
+    SAMPLE_ARTICLE_PATH,
+    SAMPLE_ARTICLE_URL,
+    FakeNewsApi,
+)
 
 # ===========================================================================
 # Section A — Unit / mock tests
@@ -60,13 +67,103 @@ class TestToolGetLatestNewsMock:
         assert "≥ 1" in result
         api.fetch_from_api.assert_not_awaited()
 
-    async def test_high_limit_adds_cap_note(self, news_item):
-        """A limit above the API maximum must append a note about the cap."""
-        items = [dict(news_item, title=f"Item {i}") for i in range(50)]
+    async def test_negative_limit_reports_actual_value(self):
+        """A negative limit must be echoed verbatim, not reported as limit=0."""
+        api = FakeNewsApi()
+        result = await tool_get_latest_news(api, limit=-5)
+        assert "limit=-5" in result
+        assert "limit=0" not in result
+        assert "≥ 1" in result
+        api.fetch_from_api.assert_not_awaited()
+
+    async def test_fewer_items_than_requested_adds_notice(self, news_item):
+        """Fewer items than requested must produce a truthful count notice."""
+        items = [dict(news_item, title=f"Item {i}") for i in range(11)]
         api = FakeNewsApi(fetch_response={"news": items})
-        result = await tool_get_latest_news(api, limit=100)
-        assert "API maximum" in result
-        assert "50" in result
+        result = await tool_get_latest_news(api, limit=1000)
+        assert "Returned 11 of 1000 requested items" in result
+        assert "no page-size parameter" in result
+        assert "50" not in result
+
+    async def test_full_result_adds_no_notice(self, news_item):
+        """Receiving every requested item must not append any notice."""
+        items = [dict(news_item, title=f"Item {i}") for i in range(20)]
+        api = FakeNewsApi(fetch_response={"news": items})
+        result = await tool_get_latest_news(api, limit=3)
+        assert "requested items" not in result
+
+
+class TestToolGetArticleMock:
+    """Unit tests for tool_get_article()."""
+
+    async def test_html_url_returns_full_article(self, article_document):
+        """A valid .html link must render the article title and body text."""
+        api = FakeNewsApi(fetch_response=article_document)
+        result = await tool_get_article(api, SAMPLE_ARTICLE_URL)
+        assert "Städtetag fordert mehr Geld für die Pflege" in result
+        assert "Der Deutsche Städtetag" in result
+
+    async def test_html_url_is_fetched_as_api_path(self, article_document):
+        """The .html link must be fetched as the relative /api2u JSON path."""
+        api = FakeNewsApi(fetch_response=article_document)
+        await tool_get_article(api, SAMPLE_ARTICLE_URL)
+        api.fetch_from_api.assert_awaited_once_with(SAMPLE_ARTICLE_PATH)
+
+    async def test_details_url_passes_through(self, article_document):
+        """An /api2u .json details link must reduce to the very same path."""
+        api = FakeNewsApi(fetch_response=article_document)
+        await tool_get_article(api, SAMPLE_ARTICLE_DETAILS)
+        api.fetch_from_api.assert_awaited_once_with(SAMPLE_ARTICLE_PATH)
+
+    async def test_foreign_host_is_rejected_without_request(self):
+        """A link to another host must be rejected before any request is sent."""
+        api = FakeNewsApi()
+        result = await tool_get_article(api, "https://evil.com/inland/x-100.html")
+        assert "Invalid article URL" in result
+        api.fetch_from_api.assert_not_awaited()
+
+    async def test_malformed_url_rejected_without_request(self):
+        """A string that is not a URL must be rejected before any request."""
+        api = FakeNewsApi()
+        result = await tool_get_article(api, "hello world")
+        assert "Invalid article URL" in result
+        api.fetch_from_api.assert_not_awaited()
+
+    async def test_empty_url_rejected_without_request(self):
+        """An empty URL must be rejected before any request."""
+        api = FakeNewsApi()
+        result = await tool_get_article(api, "")
+        assert "Invalid article URL" in result
+        api.fetch_from_api.assert_not_awaited()
+
+    async def test_api_error_returns_error_message(self, error_response):
+        """An upstream error must be surfaced as an article fetch error."""
+        api = FakeNewsApi(fetch_response=error_response)
+        result = await tool_get_article(api, SAMPLE_ARTICLE_URL)
+        assert "Error fetching article" in result
+
+    async def test_rate_limit_message_surfaces(self):
+        """An exhausted rate limit must surface its explanatory message."""
+        api = FakeNewsApi(
+            fetch_response={
+                "error": "Rate limit exceeded",
+                "message": "No request was sent upstream. Try again later.",
+            }
+        )
+        result = await tool_get_article(api, SAMPLE_ARTICLE_URL)
+        assert "No request was sent upstream" in result
+
+    async def test_non_dict_response_returns_clean_error(self):
+        """A JSON array response must produce an error, not an AttributeError."""
+        api = FakeNewsApi(fetch_response=["a", "b"])
+        result = await tool_get_article(api, SAMPLE_ARTICLE_URL)
+        assert "Error fetching article" in result
+
+    async def test_document_without_title_reports_not_found(self):
+        """A document carrying no title must report that no article was found."""
+        api = FakeNewsApi(fetch_response={})
+        result = await tool_get_article(api, SAMPLE_ARTICLE_URL)
+        assert "No article found" in result
 
 
 class TestToolGetNewsByRessortMock:
@@ -105,6 +202,30 @@ class TestToolGetNewsByRessortMock:
         api = FakeNewsApi(news_response={"items": [news_item]})
         result = await tool_get_news_by_ressort(api, ressort)
         assert "Error" not in result or "Invalid" not in result
+
+    async def test_negative_limit_reports_actual_value(self):
+        """A negative limit must be echoed verbatim, not reported as limit=0."""
+        api = FakeNewsApi()
+        result = await tool_get_news_by_ressort(api, "inland", limit=-5)
+        assert "limit=-5" in result
+        assert "limit=0" not in result
+        assert "≥ 1" in result
+        api.get_news.assert_not_awaited()
+
+    async def test_fewer_items_than_requested_adds_notice(self, news_item):
+        """Fewer items than requested must produce a truthful count notice."""
+        items = [dict(news_item, title=f"Item {i}") for i in range(11)]
+        api = FakeNewsApi(news_response={"items": items})
+        result = await tool_get_news_by_ressort(api, "inland", limit=1000)
+        assert "Returned 11 of 1000 requested items" in result
+        assert "50" not in result
+
+    async def test_full_result_adds_no_notice(self, news_item):
+        """Receiving every requested item must not append any notice."""
+        items = [dict(news_item, title=f"Item {i}") for i in range(20)]
+        api = FakeNewsApi(news_response={"items": items})
+        result = await tool_get_news_by_ressort(api, "inland", limit=3)
+        assert "requested items" not in result
 
     async def test_uppercase_ressort_is_normalised(self, news_item):
         """'INLAND' must be accepted and treated identically to 'inland'."""
@@ -168,6 +289,30 @@ class TestToolGetRegionalNewsMock:
         assert "limit=0" in result
         assert "≥ 1" in result
 
+    async def test_negative_limit_reports_actual_value(self):
+        """A negative limit must be echoed verbatim, not reported as limit=0."""
+        api = FakeNewsApi()
+        result = await tool_get_regional_news(api, 2, limit=-5)
+        assert "limit=-5" in result
+        assert "limit=0" not in result
+        assert "≥ 1" in result
+        api.get_news.assert_not_awaited()
+
+    async def test_fewer_items_than_requested_adds_notice(self, news_item):
+        """Fewer items than requested must produce a truthful count notice."""
+        items = [dict(news_item, title=f"Item {i}") for i in range(11)]
+        api = FakeNewsApi(news_response={"items": items})
+        result = await tool_get_regional_news(api, 2, limit=1000)
+        assert "Returned 11 of 1000 requested items" in result
+        assert "50" not in result
+
+    async def test_full_result_adds_no_notice(self, news_item):
+        """Receiving every requested item must not append any notice."""
+        items = [dict(news_item, title=f"Item {i}") for i in range(20)]
+        api = FakeNewsApi(news_response={"items": items})
+        result = await tool_get_regional_news(api, 2, limit=3)
+        assert "requested items" not in result
+
     async def test_empty_regional_news(self):
         """An empty regional news list must produce a 'no regional news' message."""
         api = FakeNewsApi(news_response={"items": []})
@@ -219,6 +364,37 @@ class TestToolSearchNewsMock:
         await tool_search_news(api, "test", page_size=0)
         call_params = api.fetch_from_api.call_args[0][1]
         assert call_params["pageSize"] == "1"
+
+    async def test_empty_search_text_rejected(self):
+        """An empty search text must be rejected before any HTTP request."""
+        api = FakeNewsApi()
+        result = await tool_search_news(api, "")
+        assert "Invalid search text" in result
+        api.fetch_from_api.assert_not_awaited()
+
+    async def test_whitespace_search_text_rejected(self):
+        """A whitespace-only search text must be rejected before any request."""
+        api = FakeNewsApi()
+        result = await tool_search_news(api, "   ")
+        assert "Invalid search text" in result
+        api.fetch_from_api.assert_not_awaited()
+
+    async def test_negative_result_page_rejected(self):
+        """A negative result page must be rejected before any HTTP request."""
+        api = FakeNewsApi()
+        result = await tool_search_news(api, "Ukraine", result_page=-1)
+        assert "Invalid result page: -1" in result
+        assert "zero-based" in result
+        api.fetch_from_api.assert_not_awaited()
+
+    async def test_valid_search_still_works(self, search_response):
+        """A valid query must still reach the API and render its results."""
+        api = FakeNewsApi(fetch_response=search_response)
+        result = await tool_search_news(api, "Ukraine", page_size=5, result_page=0)
+        assert "# Search Results for 'Ukraine'" in result
+        assert "Ukraine Neuigkeiten" in result
+        assert "Invalid" not in result
+        api.fetch_from_api.assert_awaited_once()
 
     async def test_total_count_shown(self, search_response):
         """The total result count from the API must appear in the output."""
@@ -276,6 +452,14 @@ class TestToolsLive:
         result = await tool_get_latest_news(live_api, limit=5)
         assert "# Latest News" in result
         assert "Error" not in result
+
+    async def test_get_article_live(self, live_api):
+        """A link from the live homepage feed must resolve to full article text."""
+        homepage = await live_api.fetch_from_api(ENDPOINTS["homepage"])
+        url = homepage["news"][0]["details"]
+        result = await tool_get_article(live_api, url)
+        assert "Error" not in result
+        assert "Invalid" not in result
 
     async def test_get_news_by_ressort_inland_live(self, live_api):
         """Live inland ressort must return a news header without errors."""

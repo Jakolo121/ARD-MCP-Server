@@ -16,10 +16,12 @@ from typing import Optional
 from german_newsfeed_mcp.client import ENDPOINTS, NewsApiClient
 from german_newsfeed_mcp.formatters import (_format_streams,
                                             format_channels,
+                                            format_news_item,
                                             format_news_list)
 
 from german_newsfeed_mcp.validators import (VALID_REGION_IDS,
                                             VALID_RESSORTS,
+                                            article_path_from_url,
                                             normalise_ressort,
                                             validate_ressort)
 
@@ -27,9 +29,6 @@ from german_newsfeed_mcp.validators import (VALID_REGION_IDS,
 __all__ = ["VALID_RESSORTS", "VALID_REGION_IDS", "validate_ressort"]
 
 logger = logging.getLogger(__name__)
-
-# The Tagesschau /api2u/news endpoint returns at most this many items per call.
-_API_MAX_NEWS_ITEMS = 50
 
 # Advisory notice prepended when both regions AND ressort are requested.
 # Verified 2025-04: the upstream API silently ignores `regions` when `ressort`
@@ -43,12 +42,39 @@ _REGION_RESSORT_WARNING = (
 
 
 # ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+
+def _page_size_notice(returned: int, limit: int) -> str:
+    """Build a notice when fewer items were returned than the caller requested.
+
+    Args:
+        returned: Number of items actually rendered.
+        limit:    Number of items the caller requested.
+
+    Returns:
+        A Markdown blockquote notice, or an empty string when the caller
+        received everything that was requested.
+    """
+    if returned >= limit:
+        return ""
+    return (
+        f"\n\n> ℹ️ Returned {returned} of {limit} requested items. "
+        "The upstream Tagesschau API decides how many items a page contains "
+        "— this endpoint offers no page-size parameter."
+    )
+
+
+# ---------------------------------------------------------------------------
 # Tool implementations
 # ---------------------------------------------------------------------------
 
 
 async def tool_get_latest_news(api: NewsApiClient, limit: int = 10) -> str:
     """Return the latest headlines from the Tagesschau homepage.
+
+    Items come from the homepage endpoint and include the full article text.
 
     Args:
         api:   Injected client for upstream API access.
@@ -57,7 +83,10 @@ async def tool_get_latest_news(api: NewsApiClient, limit: int = 10) -> str:
     logger.info("tool_get_latest_news limit=%d", limit)
 
     if limit <= 0:
-        return "ℹ️ limit=0 — no items requested. Please specify a limit ≥ 1."
+        return (
+            f"ℹ️ limit={limit} — no items requested. "
+            "Please specify a limit ≥ 1."
+        )
 
     response = await api.fetch_from_api(ENDPOINTS["homepage"])
 
@@ -67,13 +96,40 @@ async def tool_get_latest_news(api: NewsApiClient, limit: int = 10) -> str:
     news_items = response.get("news", [])
     result = format_news_list(news_items, limit)
 
-    if limit > _API_MAX_NEWS_ITEMS:
-        result += (
-            f"\n\n>Requested limit {limit} exceeds the API maximum of"
-            f" {_API_MAX_NEWS_ITEMS} items per request."
-        )
+    return result + _page_size_notice(min(len(news_items), limit), limit)
 
-    return result
+
+async def tool_get_article(api: NewsApiClient, url: str) -> str:
+    """Return the full text of a single Tagesschau article.
+
+    Costs exactly one upstream request.
+
+    Args:
+        api: Injected client for upstream API access.
+        url: Article link as rendered in the news listings.
+    """
+    logger.info("tool_get_article url=%r", url)
+
+    path, error = article_path_from_url(url)
+    if error:
+        return error
+
+    document = await api.fetch_from_api(path)
+
+    # The path is caller-derived, so an unexpected endpoint may answer with a
+    # JSON array; .get() would raise AttributeError on it.
+    if not isinstance(document, dict):
+        return ("Error fetching article: the upstream response was not a "
+                "single article document.")
+
+    if "error" in document:
+        return f"Error fetching article: {document['message']}"
+
+    if not document.get("title"):
+        return (f"No article found at {url}. The link may be outdated or may "
+                "not point to an article page.")
+
+    return format_news_item(document)
 
 
 async def tool_get_news_by_ressort(
@@ -82,6 +138,9 @@ async def tool_get_news_by_ressort(
     limit: int = 10,
 ) -> str:
     """Return news filtered by category (Ressort).
+
+    Items come from the news endpoint, which returns metadata only (title,
+    topline, date, teaser sentence) — no full article text.
 
     Args:
         api:     Injected client for upstream API access.
@@ -92,7 +151,10 @@ async def tool_get_news_by_ressort(
     logger.info("tool_get_news_by_ressort ressort=%s limit=%d", ressort, limit)
 
     if limit <= 0:
-        return "ℹ️ limit=0 — no items requested. Please specify a limit ≥ 1."
+        return (
+            f"ℹ️ limit={limit} — no items requested. "
+            "Please specify a limit ≥ 1."
+        )
 
     ressort = normalise_ressort(ressort)
     error = validate_ressort(ressort)
@@ -108,13 +170,7 @@ async def tool_get_news_by_ressort(
 
     formatted = format_news_list(result["items"], limit)
 
-    if limit > _API_MAX_NEWS_ITEMS:
-        formatted += (
-            f"\n\n>Requested limit {limit} exceeds the API maximum of"
-            f" {_API_MAX_NEWS_ITEMS} items per request."
-        )
-
-    return formatted
+    return formatted + _page_size_notice(min(len(result["items"]), limit), limit)
 
 
 async def tool_get_regional_news(
@@ -124,6 +180,9 @@ async def tool_get_regional_news(
     limit: int = 10,
 ) -> str:
     """Return news for a specific German federal state.
+
+    Items come from the news endpoint, which returns metadata only (title,
+    topline, date, teaser sentence) — no full article text.
 
     Args:
         api:       Injected client for upstream API access.
@@ -139,7 +198,10 @@ async def tool_get_regional_news(
     )
 
     if limit <= 0:
-        return "ℹ️ limit=0 — no items requested. Please specify a limit ≥ 1."
+        return (
+            f"ℹ️ limit={limit} — no items requested. "
+            "Please specify a limit ≥ 1."
+        )
 
     if region_id not in VALID_REGION_IDS:
         return f"Invalid region ID: {region_id}. Valid options are 1–16."
@@ -165,13 +227,7 @@ async def tool_get_regional_news(
     if ressort is not None:
         formatted = _REGION_RESSORT_WARNING + formatted
 
-    if limit > _API_MAX_NEWS_ITEMS:
-        formatted += (
-            f"\n\n>Requested limit {limit} exceeds the API maximum of"
-            f" {_API_MAX_NEWS_ITEMS} items per request."
-        )
-
-    return formatted
+    return formatted + _page_size_notice(min(len(result["items"]), limit), limit)
 
 
 async def tool_search_news(
@@ -181,6 +237,9 @@ async def tool_search_news(
     result_page: int = 0,
 ) -> str:
     """Search for news articles by keyword.
+
+    Results come from the search endpoint, which returns metadata only
+    (title, date, article type) — no full article text.
 
     Args:
         api:         Injected client for upstream API access.
@@ -194,6 +253,18 @@ async def tool_search_news(
         page_size,
         result_page,
     )
+
+    if not search_text.strip():
+        return (
+            "Invalid search text: must not be empty. "
+            "Please provide at least one search term."
+        )
+
+    if result_page < 0:
+        return (
+            f"Invalid result page: {result_page}. "
+            "Page numbers are zero-based, so the lowest valid page is 0."
+        )
 
     page_size = max(1, min(page_size, 30))
 
