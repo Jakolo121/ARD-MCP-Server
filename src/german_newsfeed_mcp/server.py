@@ -26,6 +26,7 @@ from german_newsfeed_mcp.resources import (
     resource_search,
 )
 from german_newsfeed_mcp.tools import (
+    tool_get_article,
     tool_get_channels,
     tool_get_latest_news,
     tool_get_news_by_ressort,
@@ -71,6 +72,9 @@ mcp = FastMCP(
 async def get_latest_news(limit: int = 10) -> str:
     """Get the latest news from Tagesschau.
 
+    This tool reads the homepage feed and returns the full article text
+    for each item.
+
     Args:
         limit: Maximum number of news items to return (default: 10).
     """
@@ -78,8 +82,36 @@ async def get_latest_news(limit: int = 10) -> str:
 
 
 @mcp.tool()
+async def get_article(url: str) -> str:
+    """Get the complete text of one Tagesschau article.
+
+    Use this when a news listing gave you only a headline or a teaser
+    sentence and you need the full article. Pass the 🔗 Volltext link
+    printed with each item by get_latest_news, get_news_by_ressort or
+    get_regional_news, for example:
+    https://www.tagesschau.de/api2u/inland/innenpolitik/x-100.json
+    A plain https://www.tagesschau.de/....html article link works too.
+
+    This costs one upstream request per call out of a budget of 60 requests
+    per hour, so call it for the articles that actually matter instead of
+    for every headline in a listing.
+
+    Results from search_news carry no link and cannot be passed to this
+    tool — locate the article via get_latest_news or get_news_by_ressort
+    first.
+
+    Args:
+        url: The article link shown in a news listing.
+    """
+    return await tool_get_article(api_client, url)
+
+
+@mcp.tool()
 async def get_news_by_ressort(ressort: str, limit: int = 10) -> str:
     """Get news by ressort/category.
+
+    This tool returns metadata only — title, topline, date and a teaser
+    sentence — never the full article text.
 
     Args:
         ressort: The ressort/category to filter by.
@@ -97,6 +129,9 @@ async def get_regional_news(
     limit: int = 10,
 ) -> str:
     """Get regional news for a specific German state.
+
+    This tool returns metadata only — title, topline, date and a teaser
+    sentence — never the full article text.
 
     Args:
         region_id: The ID of the region/state.
@@ -118,6 +153,10 @@ async def search_news(
     result_page: int = 0,
 ) -> str:
     """Search for news articles by keyword.
+
+    This tool returns metadata only — title, date and article type —
+    never the full article text, and no article link, so search results
+    cannot be passed to get_article.
 
     Args:
         search_text: The text to search for.

@@ -1,7 +1,7 @@
 <!-- mcp-name: io.github.Jakolo121/german-newsfeed-mcp -->
 
-![pylint](https://img.shields.io/badge/pylint-9.97%2F10-brightgreen)
-![tests](https://img.shields.io/badge/tests-181%20passed-brightgreen)
+![pylint](https://img.shields.io/badge/pylint-10.00%2F10-brightgreen)
+![tests](https://img.shields.io/badge/tests-273%20passed-brightgreen)
 ![python](https://img.shields.io/badge/python-3.12%2B-blue)
 ![license](https://img.shields.io/badge/license-Apache%202.0-blue)
 
@@ -33,15 +33,15 @@ Beispiel: Auf die Frage _„Was sind die aktuellen Schlagzeilen?"_ antwortet
 der Assistent mit den Top-Meldungen von tagesschau.de, jeweils mit Titel,
 Datum, Kurztext und Link zum Artikel.
 
-![pylint](https://img.shields.io/badge/pylint-9.97%2F10-brightgreen)
-![tests](https://img.shields.io/badge/tests-181%20passed-brightgreen)
+![pylint](https://img.shields.io/badge/pylint-10.00%2F10-brightgreen)
+![tests](https://img.shields.io/badge/tests-273%20passed-brightgreen)
 ![python](https://img.shields.io/badge/python-3.12%2B-blue)
 ![license](https://img.shields.io/badge/license-Apache%202.0-blue)
 
 Sprache:
 
 - 🇩🇪 Deutsch
-- 🇬🇧 [English](README_en.md)
+- 🇬🇧 [English](README.md)
 
 ---
 
@@ -128,7 +128,7 @@ nicht zum Training von KI-Modellen verwendet werden.
 | **Rate Limiter**     | Lokaler Token-Bucket, hält das 60/h-Limit der API ein     |
 | **Dual-Transport**   | `stdio` lokal; `streamable-http` für Remote und Docker    |
 | **Docker**           | Multi-Stage-Build, Nicht-Root-User, Health-Checks, Limits |
-| **181 Tests**        | 160 Unit-Tests + 21 Live-Integrationstests                |
+| **273 Tests**        | 251 Unit-Tests + 22 Live-Integrationstests                |
 | **Makefile**         | `make test`, `make lint`, `make docker-build`             |
 | **Keine Secrets**    | Öffentliche API, kein API-Schlüssel nötig                 |
 
@@ -153,6 +153,7 @@ german-newsfeed-mcp/
 │   ├── conftest.py          # Fixtures, Mock-Daten
 │   ├── test_client.py       # Client-Tests
 │   ├── test_rate_limiter.py # Rate-Limiter-Tests
+│   ├── test_validators.py   # Validator-Tests
 │   ├── test_formatters.py   # Formatter-Tests
 │   ├── test_tools.py        # Tool-Tests
 │   └── test_resources.py    # Ressourcen-Tests
@@ -165,7 +166,7 @@ german-newsfeed-mcp/
 ├── Makefile                 # Entwickler-Tools
 ├── CHANGELOG.md             # Versionshistorie
 ├── CONTRIBUTING.md          # Beiträge
-└── README.md                # Diese Datei
+└── README_de.md             # Diese Datei
 ```
 
 ---
@@ -344,15 +345,35 @@ Dein Assistent kann diese aufrufen.
 
 Top-Meldungen abrufen.
 
+Liefert zu jeder Meldung den vollständigen Artikeltext (Homepage-Feed). Jede Meldung trägt zusätzlich einen `🔗 Volltext:`-Link, den `get_article` entgegennimmt.
+
 | Parameter | Typ | Standard | Beschreibung        |
 | --------- | --- | -------- | ------------------- |
 | `limit`   | int | 10       | Maximale Ergebnisse |
 
 ---
 
+### `get_article`
+
+Volltext einer einzelnen Meldung abrufen.
+
+Nimmt den `🔗 Volltext:`-Link entgegen, den `get_latest_news`, `get_news_by_ressort` und `get_regional_news` zu jeder Meldung ausgeben; ein gewöhnlicher `https://www.tagesschau.de/<pfad>.html`-Artikellink funktioniert ebenfalls.
+
+| Parameter | Typ | Standard | Beschreibung                           |
+| --------- | --- | -------- | -------------------------------------- |
+| `url`     | str | —        | Artikellink aus einer Nachrichtenliste |
+
+> Kostet genau einen Upstream-Request pro Aufruf aus dem Budget von 60 Requests pro Stunde — also gezielt für die Artikel aufrufen, auf die es ankommt, nicht für jede Schlagzeile einer Liste.
+
+> Ergebnisse von `search_news` enthalten keinen Artikellink und lassen sich nicht an `get_article` übergeben. Den Artikel vorher über `get_latest_news`, `get_news_by_ressort` oder `get_regional_news` heraussuchen.
+
+---
+
 ### `get_news_by_ressort`
 
 Nach Kategorie filtern.
+
+Liefert nur Metadaten — Titel, Topline, Datum und einen Teaser-Satz — keinen vollständigen Artikeltext. Jede Meldung trägt einen `🔗 Volltext:`-Link, aus dem `get_article` den vollständigen Text holt.
 
 | Parameter | Typ | Standard | Beschreibung                                                            |
 | --------- | --- | -------- | ----------------------------------------------------------------------- |
@@ -367,6 +388,8 @@ Nach Kategorie filtern.
 
 Regionalnachrichten.
 
+Liefert nur Metadaten — Titel, Topline, Datum und einen Teaser-Satz — keinen vollständigen Artikeltext. Jede Meldung trägt einen `🔗 Volltext:`-Link, aus dem `get_article` den vollständigen Text holt; da Regionalmeldungen von einer ARD-Landesrundfunkanstalt stammen, kommt zusätzlich eine Zeile `📰 Quelle:` mit dem Link zur Anstalt hinzu.
+
 | Parameter   | Typ | Standard | Beschreibung                                                                                                           |
 | ----------- | --- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `region_id` | int | —        | 1=BW · 2=BY · 3=BE · 4=BB · 5=HB · 6=HH · 7=HE · 8=MV · 9=NI · 10=NRW · 11=RLP · 12=SL · 13=SN · 14=ST · 15=SH · 16=TH |
@@ -378,6 +401,8 @@ Regionalnachrichten.
 ### `search_news`
 
 Volltextsuche.
+
+Liefert nur Metadaten — Titel, Datum und Artikeltyp — keinen vollständigen Artikeltext. Suchergebnisse enthalten keinen Artikellink und lassen sich deshalb nicht an `get_article` übergeben.
 
 | Parameter     | Typ | Standard | Beschreibung                  |
 | ------------- | --- | -------- | ----------------------------- |
@@ -505,8 +530,8 @@ make check
 ### Erwartete Ergebnisse
 
 ```
-160 passed            ← Unit-Tests
- 21 selected          ← Integrationstests
+251 passed            ← Unit-Tests
+ 22 selected          ← Integrationstests
 ```
 
 ---

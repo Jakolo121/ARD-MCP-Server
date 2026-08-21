@@ -38,6 +38,16 @@ _URL_ADAPTIVE_LIVE = (
 # Sample API payloads  (structure mirrors the real Tagesschau API)
 # ---------------------------------------------------------------------------
 
+#: A real-shaped article triple: the API ``details`` URL, the human-facing
+#: ``.html`` URL, and the relative API path both of them reduce to.
+SAMPLE_ARTICLE_DETAILS = (
+    "https://www.tagesschau.de/api2u/inland/innenpolitik/staedtetag-pflege-100.json"
+)
+SAMPLE_ARTICLE_URL = (
+    "https://www.tagesschau.de/inland/innenpolitik/staedtetag-pflege-100.html"
+)
+SAMPLE_ARTICLE_PATH = "/api2u/inland/innenpolitik/staedtetag-pflege-100.json"
+
 SAMPLE_NEWS_ITEM = {
     "sophoraId": "abc123",
     "title": "Testmeldung: Wichtige Neuigkeit",
@@ -47,9 +57,9 @@ SAMPLE_NEWS_ITEM = {
         {"value": "Das ist der erste Satz der Nachricht."},
         {"value": "Und hier kommt noch mehr Text."},
     ],
-    "details": "https://www.tagesschau.de/detail/abc123",
-    "detailsweb": "https://www.tagesschau.de/detail/abc123-web",
-    "shareURL": "https://www.tagesschau.de/share/abc123",
+    "details": SAMPLE_ARTICLE_DETAILS,
+    "detailsweb": SAMPLE_ARTICLE_URL,
+    "shareURL": SAMPLE_ARTICLE_URL,
     "ressort": "inland",
     "type": "story",
     "breakingNews": False,
@@ -79,6 +89,36 @@ SAMPLE_REGIONAL_ITEM = {
     "content": [{"value": "Neuigkeit aus Bayern."}],
     "type": "story",
     "regionId": "2",
+}
+
+#: The document returned by fetching a ``details`` URL. Shape-identical to a
+#: homepage news item; note that ``box`` and ``related`` parts carry an empty
+#: ``value`` in real upstream data.
+SAMPLE_ARTICLE_DOCUMENT = {
+    "title": "Städtetag fordert mehr Geld für die Pflege",
+    "topline": "Kommunalfinanzen",
+    "date": "2026-04-09T10:00:00.000+02:00",
+    "firstSentence": "Die Kommunen sehen die Pflege vor dem Kollaps.",
+    "shareURL": SAMPLE_ARTICLE_URL,
+    "details": SAMPLE_ARTICLE_DETAILS,
+    "tags": [{"tag": "Pflege"}, {"tag": "Städtetag"}],
+    "content": [
+        {
+            "type": "text",
+            "value": (
+                "<strong>Der Deutsche Städtetag</strong> warnt vor einer "
+                "<em>dramatischen</em> Finanzlücke in der Pflege."
+            ),
+        },
+        {"type": "headline", "value": "<h2>Forderungen an den Bund</h2>"},
+        {
+            "type": "text",
+            "value": "<p>Die Städte fordern eine dauerhafte Beteiligung.</p>",
+        },
+        {"type": "box", "value": ""},
+        {"type": "related", "value": ""},
+    ],
+    "type": "story",
 }
 
 SAMPLE_HOMEPAGE_RESPONSE = {
@@ -159,6 +199,12 @@ def news_item():
 def video_news_item():
     """Return a sample video news item with stream URLs."""
     return dict(SAMPLE_VIDEO_NEWS_ITEM)
+
+
+@pytest.fixture()
+def article_document():
+    """Return a sample article document (as returned by a details URL)."""
+    return dict(SAMPLE_ARTICLE_DOCUMENT)
 
 
 @pytest.fixture()

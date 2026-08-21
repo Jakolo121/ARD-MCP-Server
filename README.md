@@ -2,8 +2,8 @@
 
 <!-- mcp-name: io.github.Jakolo121/german-newsfeed-mcp -->
 
-![pylint](https://img.shields.io/badge/pylint-9.97%2F10-brightgreen)
-![tests](https://img.shields.io/badge/tests-181%20passed-brightgreen)
+![pylint](https://img.shields.io/badge/pylint-10.00%2F10-brightgreen)
+![tests](https://img.shields.io/badge/tests-273%20passed-brightgreen)
 ![python](https://img.shields.io/badge/python-3.12%2B-blue)
 ![license](https://img.shields.io/badge/license-Apache%202.0-blue)
 
@@ -35,7 +35,7 @@ date, summary, and a link to the article.
 
 Language:
 
-- 🇩🇪 [Deutsch](README.md)
+- 🇩🇪 [Deutsch](README_de.md)
 - 🇬🇧 English
 
 ---
@@ -121,7 +121,7 @@ train AI models.
 | ⏱️ **Rate limiter**     | Local token bucket honouring the API's 60/h limit                       |
 | 🚀 **Dual transport**   | `stdio` for local Claude Desktop; `streamable-http` for remote / Docker |
 | 🐳 **Docker-ready**     | Multi-stage image, non-root user, health-check, resource limits         |
-| ✅ **181 tests**        | 160 unit tests + 21 live integration tests                              |
+| ✅ **273 tests**        | 251 unit tests + 22 live integration tests                              |
 | 🛠️ **Makefile**         | `make test`, `make lint`, `make docker-build` and more                  |
 | 🔒 **No secrets**       | Public API, no API keys                                                 |
 
@@ -146,6 +146,7 @@ german-newsfeed-mcp/
 │   ├── conftest.py          # Shared fixtures & mock payloads
 │   ├── test_client.py       # Client unit + live integration tests
 │   ├── test_rate_limiter.py # Rate-limiter unit tests
+│   ├── test_validators.py   # Validator unit tests (URL & ressort checks)
 │   ├── test_formatters.py   # Formatter unit tests (pure functions)
 │   ├── test_tools.py        # Tool unit + live integration tests
 │   └── test_resources.py    # Resource unit + live integration tests
@@ -158,7 +159,7 @@ german-newsfeed-mcp/
 ├── Makefile                 # Developer shortcuts (test, lint, docker, clean)
 ├── CHANGELOG.md             # Version history
 ├── CONTRIBUTING.md          # How to contribute
-└── README.md                # German version of this file
+└── README_de.md             # German version of this file
 ```
 
 ---
@@ -337,15 +338,35 @@ These tools are callable by your AI assistant.
 
 Get the top stories.
 
+Returns the full article text for each item (homepage feed). Every item also carries a `🔗 Volltext:` link that `get_article` accepts.
+
 | Parameter | Type | Default | Description         |
 | --------- | ---- | ------- | ------------------- |
 | `limit`   | int  | 10      | Max items to return |
 
 ---
 
+### `get_article`
+
+Get the complete text of a single article.
+
+Takes the `🔗 Volltext:` link printed with every item by `get_latest_news`, `get_news_by_ressort` and `get_regional_news`; a plain `https://www.tagesschau.de/<path>.html` article link works too.
+
+| Parameter | Type | Default | Description                          |
+| --------- | ---- | ------- | ------------------------------------ |
+| `url`     | str  | —       | Article link shown in a news listing |
+
+> Costs exactly one upstream request per call out of the 60/h budget — call it for the articles that matter, not for every headline in a listing.
+
+> `search_news` results carry no article link and cannot be passed to `get_article`. Locate the article via `get_latest_news`, `get_news_by_ressort` or `get_regional_news` first.
+
+---
+
 ### `get_news_by_ressort`
 
 Filter news by category.
+
+Returns metadata only — title, topline, date and a teaser sentence — no full article text. Every item carries a `🔗 Volltext:` link that `get_article` resolves into the full text.
 
 | Parameter | Type | Default | Description                                                             |
 | --------- | ---- | ------- | ----------------------------------------------------------------------- |
@@ -360,6 +381,8 @@ Filter news by category.
 
 News from a specific German state.
 
+Returns metadata only — title, topline, date and a teaser sentence — no full article text. Every item carries a `🔗 Volltext:` link that `get_article` resolves into the full text; because regional items originate at an ARD state broadcaster, they additionally carry a `📰 Quelle:` line naming that broadcaster.
+
 | Parameter   | Type | Default | Description                                                                                                          |
 | ----------- | ---- | ------- | -------------------------------------------------------------------------------------------------------------------- |
 | `region_id` | int  | —       | 1=BW · 2=BY · 3=BE · 4=BB · 5=HB · 6=HH · 7=HE · 8=MV · 9=NI · 10=NW · 11=RP · 12=SL · 13=SN · 14=ST · 15=SH · 16=TH |
@@ -371,6 +394,8 @@ News from a specific German state.
 ### `search_news`
 
 Full-text search across all available articles.
+
+Returns metadata only — title, date and article type — no full article text. Search results carry no article link and therefore cannot be passed to `get_article`.
 
 | Parameter     | Type | Default | Description               |
 | ------------- | ---- | ------- | ------------------------- |
@@ -498,8 +523,8 @@ make check
 ### Expected results
 
 ```
-160 passed            ← unit tests (no network)
- 21 selected          ← integration tests (live API)
+251 passed            ← unit tests (no network)
+ 22 selected          ← integration tests (live API)
 ```
 
 ---

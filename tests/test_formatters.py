@@ -4,7 +4,85 @@ Unit tests for german_newsfeed_mcp.formatters.
 Pure functions — no I/O, no mocking required.
 """
 
-from german_newsfeed_mcp.formatters import format_channels, format_news_item, format_news_list
+from german_newsfeed_mcp.formatters import (
+    _strip_html,
+    format_channels,
+    format_news_item,
+    format_news_list,
+)
+from tests.conftest import SAMPLE_ARTICLE_DETAILS, SAMPLE_ARTICLE_URL
+
+
+# ---------------------------------------------------------------------------
+# _strip_html
+# ---------------------------------------------------------------------------
+
+
+class TestStripHtml:
+    """Tests for _strip_html()."""
+
+    def test_tags_are_removed(self):
+        """Markup must disappear while the text content survives."""
+        result = _strip_html("<strong>Wichtig</strong> und <em>dringend</em>")
+        assert result == "Wichtig und dringend"
+
+    def test_anchor_text_is_kept_without_markup(self):
+        """Link text must remain, the href markup must not."""
+        result = _strip_html('<a href="https://example.com">Mehr dazu</a>')
+        assert result == "Mehr dazu"
+        assert "href" not in result
+
+    def test_entities_are_unescaped(self):
+        """Named and numeric HTML entities must be decoded."""
+        result = _strip_html("B&uuml;rger &amp; St&auml;dte &#8222;Zitat&#8220;")
+        assert result == "Bürger & Städte „Zitat“"
+
+    def test_nbsp_becomes_normal_space(self):
+        """A non-breaking space must become an ordinary space."""
+        result = _strip_html("Wort&nbsp;Wort")
+        assert result == "Wort Wort"
+
+    def test_paragraph_end_separates_words(self):
+        """Adjacent paragraphs must not be glued together."""
+        result = _strip_html("<p>Ende</p><p>Anfang</p>")
+        assert "EndeAnfang" not in result
+        assert result == "Ende Anfang"
+
+    def test_br_separates_words(self):
+        """A line break must not glue the surrounding words."""
+        result = _strip_html("Zeile eins<br>Zeile zwei")
+        assert "einsZeile" not in result
+        assert result == "Zeile eins Zeile zwei"
+
+    def test_list_items_are_separated(self):
+        """List items and the closing list tag must produce separation."""
+        result = _strip_html("<ul><li>Eins</li><li>Zwei</li></ul>Danach")
+        assert "EinsZwei" not in result
+        assert result == "Eins Zwei Danach"
+
+    def test_heading_end_separates_words(self):
+        """A closing heading tag must not glue heading and body text."""
+        result = _strip_html("<h2>Titel</h2>Fliesstext")
+        assert result == "Titel Fliesstext"
+
+    def test_whitespace_is_collapsed(self):
+        """Runs of whitespace must collapse and be trimmed."""
+        result = _strip_html("  viel\n\n   Abstand \t hier  ")
+        assert result == "viel Abstand hier"
+
+    def test_empty_input_returns_empty_string(self):
+        """Empty input must return an empty string."""
+        assert _strip_html("") == ""
+
+    def test_malformed_markup_does_not_raise(self):
+        """Unclosed or broken tags must not raise."""
+        result = _strip_html("<p>Offen <strong>fett<br>Rest <unbekannt")
+        assert "Offen" in result
+        assert "fett" in result
+
+    def test_plain_text_is_unchanged(self):
+        """Text without markup must pass through unchanged."""
+        assert _strip_html("Nur Text.") == "Nur Text."
 
 
 # ---------------------------------------------------------------------------
@@ -65,6 +143,79 @@ class TestFormatNewsItem:
         result = format_news_item(news_item)
         assert result.startswith("# ")
 
+    # --- HTML content vs. firstSentence teaser ---
+
+    def test_homepage_item_content_html_is_stripped(self):
+        """Homepage items with HTML content must render as plain text."""
+        item = {
+            "title": "Homepage-Meldung",
+            "content": [
+                {"value": "<strong>Erster Absatz.</strong>", "type": "text"},
+                {"value": "<p>Zweiter <em>Absatz</em>.</p>", "type": "text"},
+            ],
+        }
+        result = format_news_item(item)
+        assert "Erster Absatz." in result
+        assert "Zweiter Absatz." in result
+        assert "<" not in result
+
+    def test_content_parts_stripped_to_empty_are_skipped(self):
+        """content parts that contain only markup must not add blank text."""
+        item = {
+            "title": "Leere Teile",
+            "content": [
+                {"value": "<br>"},
+                {"value": "<strong>Echter Text</strong>"},
+            ],
+        }
+        result = format_news_item(item)
+        assert "Echter Text" in result
+        assert "<" not in result
+
+    def test_news_item_without_content_uses_first_sentence(self):
+        """Items from /api2u/news must render firstSentence as the body."""
+        item = {
+            "title": "Meldung ohne Content",
+            "topline": "Inland",
+            "firstSentence": "Das ist der Teasersatz der Meldung.",
+        }
+        result = format_news_item(item)
+        assert "Das ist der Teasersatz der Meldung." in result
+
+    def test_empty_content_list_falls_back_to_first_sentence(self):
+        """An empty content list must not suppress the firstSentence teaser."""
+        item = {
+            "title": "Leerer Content",
+            "content": [],
+            "firstSentence": "Teaser trotz leerer Liste.",
+        }
+        result = format_news_item(item)
+        assert "Teaser trotz leerer Liste." in result
+
+    def test_content_wins_over_first_sentence(self):
+        """When content exists, firstSentence must not be printed twice."""
+        first_sentence = "Das ist der erste Satz."
+        item = {
+            "title": "Beides vorhanden",
+            "content": [{"value": f"<p>{first_sentence}</p> Und mehr Text."}],
+            "firstSentence": first_sentence,
+        }
+        result = format_news_item(item)
+        assert result.count(first_sentence) == 1
+        assert "Und mehr Text." in result
+
+    def test_neither_content_nor_first_sentence(self):
+        """Items with no body at all must still render title, topline and date."""
+        item = {
+            "title": "Nur Metadaten",
+            "topline": "Ausland",
+            "date": "2026-04-09T10:00:00.000+02:00",
+        }
+        result = format_news_item(item)
+        assert "Nur Metadaten" in result
+        assert "**Ausland**" in result
+        assert "2026-04-09" in result
+
     # --- Problem 1: video stream URLs ---
 
     def test_video_item_contains_stream_section(self, video_news_item):
@@ -112,6 +263,49 @@ class TestFormatNewsItem:
         item = {"title": "Kein Stream", "streams": {}}
         result = format_news_item(item)
         assert "Video-Streams" not in result
+
+    # --- article link: the handle a consumer passes to get_article() ---
+
+    def test_details_renders_volltext_link(self, news_item):
+        """The details URL must be rendered as the get_article handle."""
+        result = format_news_item(news_item)
+        assert f"🔗 Volltext: {SAMPLE_ARTICLE_DETAILS}" in result
+
+    def test_item_without_details_renders_no_link(self):
+        """Items without a details field must not render a link line."""
+        result = format_news_item({"title": "Ohne Link"})
+        assert "🔗" not in result
+
+    def test_link_sits_between_date_and_body(self, news_item):
+        """The link must appear after the date and before the body text."""
+        result = format_news_item(news_item)
+        date_pos = result.index("2026-04-09")
+        link_pos = result.index("🔗 Volltext:")
+        body_pos = result.index("Das ist der erste Satz")
+        assert date_pos < link_pos < body_pos
+
+    def test_foreign_share_url_renders_quelle(self):
+        """A shareURL on another ARD host must be named as the source."""
+        share_url = "https://www.swr.de/swraktuell/baden-wuerttemberg/x-100.html"
+        item = {
+            "title": "Regionalmeldung",
+            "details": SAMPLE_ARTICLE_DETAILS,
+            "shareURL": share_url,
+        }
+        result = format_news_item(item)
+        assert f"📰 Quelle: {share_url}" in result
+
+    def test_same_host_share_url_not_rendered(self, news_item):
+        """A shareURL on the same host as details adds no source line."""
+        result = format_news_item(news_item)
+        assert "📰" not in result
+
+    def test_share_url_without_details_renders_only_quelle(self):
+        """Without details there is no handle, but the source is still named."""
+        item = {"title": "Nur shareURL", "shareURL": SAMPLE_ARTICLE_URL}
+        result = format_news_item(item)
+        assert "🔗" not in result
+        assert f"📰 Quelle: {SAMPLE_ARTICLE_URL}" in result
 
 
 # ---------------------------------------------------------------------------
@@ -161,6 +355,11 @@ class TestFormatNewsList:
         result = format_news_list([video_news_item])
         assert "Video-Streams" in result
         assert "clip.webm.h264.mp4" in result
+
+    def test_article_link_appears_in_list(self, news_item):
+        """The get_article handle must propagate through format_news_list."""
+        result = format_news_list([news_item])
+        assert f"🔗 Volltext: {SAMPLE_ARTICLE_DETAILS}" in result
 
 
 # ---------------------------------------------------------------------------
